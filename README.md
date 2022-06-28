@@ -1,3 +1,6 @@
 ### Personal Webpage
 
-Current address: [https://www.ocf.berkeley.edu/~yizhu/](https://www.ocf.berkeley.edu/~yizhu/)
+TODO:
+- favicon
+- using single footer across the entire site
+- 
