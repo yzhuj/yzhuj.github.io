@@ -1,0 +1,158 @@
+body{
+	font: normal 120% roboto, sans-serif; 
+	color: black; 
+	background-color: white; 
+	margin: 0; 
+	padding: 0; 
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+  
+.name {
+	margin:15px;
+	text-align: center;
+	font: normal 175%  Georgia, serif;
+}
+
+.horizontal-line {
+	border: 1px solid;
+	border-color: white;
+	border-left-color: white;
+	border-right-color: white;
+	border-bottom-color: Gainsboro;
+}
+
+.page {
+	max-width: 1020px;
+	padding: 0px 30px 0px 30px;
+	margin: 0 auto;
+	font: normal 85% roboto, sans-serif;
+	line-height: 1.5;
+}
+
+.center {
+	max-width: 1080px;
+	margin: auto;
+}
+
+.center-left {
+  display: block;
+  margin-left: 10%;
+  margin-right: auto;
+  width: 85%;
+  transform: translate(-9%, 0%);
+  padding-bottom: 30px;
+}
+
+.center-right {
+  display: block;
+  margin-left: 10%;
+  margin-right: auto;
+  width: 85%;
+  transform: translate(9%, 0%);
+  padding-bottom: 30px;
+}
+
+.row {
+  display: flex;
+  padding-bottom: 30px;
+}
+
+.column {
+  flex: 50%;
+  padding: 10px;
+}
+
+.nav ul {
+  list-style: none;
+  padding: 20px;
+  /*max-width: 1200px;*/
+  font: normal 100% roboto, sans-serif;
+}
+
+.right {
+	float: right;
+}
+.left {
+	float:  left;
+}
+
+.nav li {
+   display: inline-block;
+   padding: 0px 10px;
+}
+
+.nav a {
+  text-decoration: none;
+  color: gray;
+  display:block;
+  text-transform: lowercase;
+  text-align: center;
+}
+
+a:hover {
+	color: lightseagreen;
+}
+
+#active{
+	color: black;
+}
+
+.main-content{
+	padding-top: 10px;
+	padding-bottom: 40px;
+	flex: 1;
+	text-align: left;
+	word-wrap: break-word;
+}
+
+footer{
+	padding: 10px;
+	background-color: #F5F5F5;
+}
+
+.footer-name{
+	font: normal 100%  roboto, sans-serif;
+}
+
+br {
+	line-height: 200%;
+}
+
+.imgright {
+	margin-left: 30px;
+	margin-top: 30px;
+	margin-bottom: 30px;
+	height: 300px;
+	float: right;
+}
+
+a {
+	text-decoration: none;
+	color: #248f8f;
+}
+
+p {
+	margin-bottom: 25px;
+}
+
+ul {
+	margin: 0px;
+}
+
+.no-bullet{
+	list-style-type: none
+}
+
+h2 {
+	font: bold 150% roboto, sans-serif;
+}
+
+.magic {
+	color: #9966ff;
+	cursor: pointer; 
+	font: italic 100% roboto, sans-serif;
+}
+
