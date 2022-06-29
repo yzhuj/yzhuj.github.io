@@ -10,7 +10,7 @@
 
   <script>
     var title = window.location.pathname.split("/").pop().split(".")[0];
-    if (title=="index") {title = "about";}
+    if (title=="index" || title=="") {title = "about";}
     document.title = title.toLowerCase() + " | Yi Zhu";
   </script>
 
