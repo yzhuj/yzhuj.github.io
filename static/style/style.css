@@ -150,6 +150,10 @@ h2 {
 	font: bold 150% roboto, sans-serif;
 }
 
+h1 {
+	font-size: 23px;
+}
+
 .magic {
 	color: #9966ff;
 	cursor: pointer; 
