@@ -2,3 +2,4 @@
 
 TODO:
 - favicon
+- update cv
