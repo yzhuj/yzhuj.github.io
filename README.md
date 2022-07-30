@@ -1,5 +1,6 @@
-### Personal Webpage
+# Personal Webpage
+
+[yizhuj.com](yizhuj.com)
 
 TODO:
 - update cv
-- image handling on mobile website
