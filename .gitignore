@@ -137,4 +137,8 @@ dmypy.json
 *.out
 *.toc
 *.gz
-
+*.cls
+*.xml
+*.bbl
+*.bcf
+*.blg

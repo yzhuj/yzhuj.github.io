@@ -1,0 +1,50 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[letterpaper, portrait, margin=1in]{geometry}
+\usepackage{amsmath}
+\numberwithin{equation}{section}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage{physics}
+\usepackage{empheq}
+\usepackage{cancel}
+\usepackage{hyperref}
+\hypersetup{colorlinks = true, urlcolor = blue, linkcolor = red, citecolor = red}
+\usepackage{enumerate}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+
+\author{Yi J Zhu}
+\title{Derivative of the Magnitude of a Vector}
+\date{\today}
+
+\begin{document}
+	
+	\maketitle
+	
+	Recall $ \boldsymbol{v}(t)\cdot \boldsymbol{v}(t) = v(t)^2$. Then,
+
+	\begin{equation}
+				\dv{v^2 }{t}= 2v\dv{v}{t}
+	\end{equation}
+
+	\begin{align}
+		\dv{v}{t} &= \frac{1}{2v}\dv{v^2}{t}\\
+		&= \frac{1}{2v}\dv{t}(\boldsymbol{v}\cdot \boldsymbol{v})\\
+		&=  \frac{1}{2v} \left( \boldsymbol{v}\cdot \boldsymbol{v}' + \boldsymbol{v}'\cdot \boldsymbol{v}\right)\\
+		&= \frac{\boldsymbol{v}\cdot \boldsymbol{v}'}{v}
+	\end{align}
+	
+	\begin{equation}
+			\boxed{\dv{v}{t} = \frac{\boldsymbol{v}\cdot \boldsymbol{v}'}{v}} 
+	\end{equation}
+	
+
+	
+\end{document}

@@ -1,0 +1,66 @@
+\documentclass[12pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[letterpaper, portrait, margin=1in]{geometry}
+\usepackage{amsmath}
+\numberwithin{equation}{section}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage{physics}
+\usepackage{empheq}
+\usepackage{cancel}
+\usepackage{hyperref}
+\hypersetup{colorlinks = true, urlcolor = blue, linkcolor = red, citecolor = red}
+\usepackage{enumerate}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+\usepackage[bottom]{footmisc}
+
+\newcommand{\unit}[1]{\hat{\boldsymbol{#1}}}
+\newcommand{\bd}[1]{\boldsymbol{#1}}
+\renewcommand{\b}[1]{\boldsymbol{#1}}
+\renewcommand{\vec}[1]{\boldsymbol{#1}}
+
+\definecolor{dmb}{HTML}{003366}
+
+\begin{document}
+	
+	\title{\textbf{Quantum Mechanics: A Brief Overview\newline\\\normalsize From \textit{Quantum Mechanics} by David J. Griffiths \\and \textit{Quantum Mechanics} by B.H. Bransden \& C.J. Joachain}}
+	\author{\textbf{Yi J. Zhu}}
+	\date{August 24, 2020\\\vspace{1em}\small Updated \today}
+	\maketitle
+	\thispagestyle{empty}
+	
+	\tableofcontents
+	
+	\chapter{Formalism}
+
+	Before discussing the formalism of quantum mechanics, we shall provide a brief review of linear algebra. 
+	
+	A vector is an N-tuple. A vector space $ \mathbb{F}^N $ is a set of vectors over the field $ \mathbb{F} $. Vectors in a vector space are commutative in addition, associative in addition, and distributive with respect to a scalar. Furthermore, all vector fields by definition contain an additive identity, additive inverse, and multiplicative identity. Vectors in quantum mechanics are represented by kets,
+	\begin{equation}
+			\ket{\alpha} \doteq \begin{pmatrix}a_1\\a_2\\\vdots\\a_N\end{pmatrix}
+	\end{equation}
+	
+	Furthermore, the inner product is a function on a vector space that takes a pair of vectors to a scalar. The inner product of vector kets $ \ket{\alpha} $ and $ \ket{\beta} $ are denoted $ \braket{\alpha}{\beta} $ and the inner product has properties, 
+	\begin{enumerate}
+		\item positive: $ \braket{\alpha}{\alpha} \geq 0$
+		\item definite: $ \braket{\alpha}{\alpha} = 0$ if and only if $ \ket{\alpha} = 0 $ 
+	\end{enumerate}
+
+	\begin{equation}
+			\sigma_i = \pm 1
+	\end{equation}
+	
+	\bibliographystyle{ieeetr}
+	\bibliography{ref.bib}
+	\nocite{*}
+	
+	\appendix
+	\chapter{Field and Source Points}
+
+\end{document}
