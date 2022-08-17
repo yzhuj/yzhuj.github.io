@@ -28,10 +28,10 @@ maxbibnames=10]{biblatex}
 	\end{paracol}
 }
 \newcommand{\plainsection}[1]{\textsc{\textbf{#1}}}
-\newcommand{\cvsection}[1]{\vspace{1em}\plainsection{#1}\vspace{3pt}}
+\newcommand{\cvsection}[1]{\vspace{1.5em}\plainsection{#1}\vspace{2pt}}
 \newcommand{\tabbed}[1]{\begin{addmargin}{2em}#1\end{addmargin}}
 \newcommand{\updateinfo}[1][\today]{\par\vfill{\scriptsize\color{gray}Updated on #1}}
-
+\newenvironment{infotable}{\hspace*{-\leftmargin}\hspace{2em}\begin{tabular}{p{6cm} | @{\hskip 1.5em}  p{3.5cm}}}{\end{tabular}}
 \begin{document}
 	
 \begin{center}
@@ -41,12 +41,11 @@ maxbibnames=10]{biblatex}
 \end{center}
 
 \row{\plainsection{Contact\\Information}}{
-	Email: yizhu@g.harvard.edu
-	
-	\medskip
-	Perkins \#312\\
-	35 Oxford St.\\
-	Cambridge, MA 02138 
+	\begin{infotable}
+		Perkins \#312            					&yizhu@g.harvard.edu\\
+		35 Oxford St.            					&yizhuj.com\\
+		Cambridge, MA 02138            		&\\
+	\end{infotable}
 }
 
 \cvsection{Education}
@@ -73,7 +72,7 @@ maxbibnames=10]{biblatex}
 	Director, Lead Instructor (2020-2022); Lab Manager, Instructor (2019-2020)
 	\tabbed{\textit{ULAB Physics \& Astronomy is a DeCal course (2-semester sequence, 2 units/semester, 2021-22 enrollment: 50-60) at UC Berkeley that facilitates under-supported and traditionally underrepresented students taking their first steps into research. Under the guidance of undergraduate peer mentors, groups of mentees complete year-long research projects on topics of their choosing. Projects are supplemented by weekly lectures on technical skills.}}
 }
-\row{\textit{2022}}{Mentor, Summer Math and Science Honors Academy supported by the Pyle-Sadoulet Group}
+\row{\textit{2022}}{Mentor, Summer Math and Science Honors (SMASH) Academy, Pyle-Sadoulet Group}
 \row{\textit{2021}}{Teacher, Bay Area Scientists in Schools at Berkeley (BASIS)}
 \row{\textit{2019-2021}}{Teacher, Splash at Berkeley}
 
