@@ -1,0 +1,275 @@
+<!-- Author: Yi J Zhu -->
+<!-- November 19, 2020 -->
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Yi J. Zhu | SA</title>
+</head>
+<body><canvas onmousedown="clicked(event,1)" onmouseup="clicked(event,0)" id="myc" style="position: absolute; left: 0px; top: 0px; background-color: rgb(17, 17, 17);">
+
+<!-- Canvas -->
+</canvas>
+<script>
+
+var canvas = document.getElementById('myc')
+var context = canvas.getContext('2d')
+var ww = window.innerWidth
+var wh = window.innerHeight
+canvas.width = ww
+canvas.height = wh
+canvas.style.width = ww
+canvas.style.height = wh
+canvas.style.position ='absolute'
+canvas.style.left = '0px'
+canvas.style.top = '0px'
+canvas.style.backgroundColor = '#111111'
+
+tour = []
+T = 100
+dT = 0.05
+N = 0
+swaps = 0
+steps = 0
+data_T = []
+data_E = []
+// energy is computation intensive, so save in variable to avoid redundant calculations
+currEnergy = 0
+
+function clicked(e,d){
+	//d = 1 if just clicked, 0 if just released
+	// console.log(d)
+	// console.log(e.pageX)
+	// console.log(e.pageY)
+
+	if(d==0){
+		var city = {
+			x: e.pageX,
+			y: e.pageY
+		}
+		tour.push(city)
+		N++
+		currEnergy = energy()
+		refreash()
+	}
+}
+
+function drawCity(x,y){
+	context.beginPath()
+	context.arc(x, y, 5, 0, 2 * Math.PI)
+	context.strokeStyle = 'blue'
+	context.stroke()
+	context.fillStyle = '#99ffff'
+	context.fill()
+}
+
+function drawPath(city1, city2){
+	context.beginPath()
+	context.moveTo(city1.x, city1.y)
+	context.lineTo(city2.x, city2.y)
+	context.strokeStyle = 'white'
+	context.stroke()
+}
+
+// draws paths connecting city based on tour
+// updates text data
+function refreash(){
+	// context.clearRect(0, 0, ww, wh)
+	canvas.width = canvas.width
+	n = tour.length
+	for(i in tour){
+		drawCity(tour[i].x, tour[i].y)
+	}
+
+	if(N>1){
+		for (i=0; i<N-1; i++){
+			drawPath(tour[i], tour[i+1])
+		}
+		drawPath(tour[N-1], tour[0])
+	}
+
+	context.beginPath()
+	context.font = "17px Courier New"
+	context.fillStyle = "white"
+	context.fillText("Simulated Annealing", 15, 25)
+	context.fillText("Traveling Salesman Problem", 15, 45)
+	context.fillText("[s] to start", 15, 65)
+	context.fillText("[?] menu", 15, 85)
+	context.fillText("N: " + N, 15, 125)
+	context.fillText("Annealing: " + dT.toFixed(3), 15, 145)
+	context.fillText("Temp: " + T.toFixed(3), 15, 165)
+	context.fillText("Energy: " + currEnergy.toFixed(3), 15, 185)
+	context.fillText("2-opts: " + swaps + "/" + steps, 15, 205)
+}
+
+refreash()
+
+function distance(city1, city2){
+	return Math.sqrt(Math.pow(city1.x-city2.x, 2) + Math.pow(city1.y-city2.y, 2))
+}
+
+function energy(){
+	if(N<2){
+		return 0
+	}
+	E = 0
+	for (i=0; i<N-1; i++){
+		E += distance(tour[i], tour[i+1])
+	}
+	return E + distance(tour[tour.length-1], tour[0])
+}
+
+function swap(i1, i2){
+	temp = tour[i1]
+	tour[i1] = tour[i2]
+	tour[i2] = temp
+}
+
+function rand(){
+	return Math.floor(Math.random()*N)
+}
+
+function sa(){
+	if(T<=0){
+		pause()
+		return
+	}
+
+	i1 = 0
+	i2 = 0
+	while(i1==i2){
+		i1 = rand()
+		i2 = rand()
+	}
+
+	swap(i1, i2)
+	newEnergy = energy()
+
+	// probability of system entering this state
+	p = 0
+	if(newEnergy<currEnergy){
+		p = 1
+	}
+	else{
+		p = Math.exp((currEnergy-newEnergy)/T)
+	}
+
+	r = Math.random()
+	// # swap is not accepted by the system, so we "swap back"
+	if (r>p){
+		swap(i1, i2)
+	}
+	else{
+		currEnergy = newEnergy
+		swaps++
+	}
+
+	steps++
+	data_T.push(T)
+	data_E.push(currEnergy)
+
+	refreash()
+
+	// reduce temperature
+	T -= dT
+}
+
+var speed = 50
+var interval
+
+function play(){
+	interval = setInterval(sa,speed)
+}
+function pause(){
+	clearInterval(interval)
+}
+
+function reset(){
+	x = ""
+	y = ""
+	for(i=0; i<N; i++){
+		x+= tour[i].x + ","
+		y+= tour[i].y + ","
+	}
+	console.log(x)
+	console.log(y)
+
+	tour = []
+	N = 0
+	T = 100
+	steps = 0
+	swaps = 0
+	data_T = []
+	data_E = []
+	currEnergy = 0
+}
+
+document.onkeypress = function(e) {
+    e = e || window.event;
+    var charCode = (typeof e.which == "number") ? e.which : e.keyCode;
+
+    if(charCode==116){
+    	T = parseFloat(prompt('Starting temperature: '))
+    }
+    else if(charCode==112){
+    	pause()
+    }
+    else if(charCode==115){
+    	if(N>3){
+    		play()
+    	}
+    }
+    else if(charCode==114){
+    	pause()
+    	// 3N random scrambles
+    	for(i=0; i<3*N; i++){
+    		swap(rand(), rand())
+    	}
+    }
+    else if(charCode==32){
+    	pause()
+    	reset()
+    }
+    else if(charCode==100){
+    	pause()
+    	data = []
+    	for(i=0; i<data_T.length; i++){
+    		data += data_T[i] + "," + data_E[i] + "\n"
+    	}
+    	download('data.csv', data)
+    }
+    else if(charCode==63){
+    	alert("Full menu:\n[s] to start\n[p] to pause\n[space] to reset\n[r] to randomize tour\n[t] to set start temp\n[a] to set annealing schedule (linear)\n[d] for data\n[1] For preset map")
+    }
+    else if(charCode==97){
+    	dT = parseFloat(prompt('Linear annealing schedule:'))
+    }
+    else if(charCode==49){
+    	pause()
+    	reset()
+    	x = [966,185,879,345,894,332,898,185,131,208,757,293,847,159,188,959,833,263,892,751,331,797,820,853,148,335,832,923,240,948,125,751,806,128,908,952,83,113,971,166,86,235,897,123,157,789,221,778,110,902,867,927,954,148,300,236,247,942,776,733,845,309,779,174,946,314,811,914,249,302]
+    	y = [346,299,391,324,488,268,261,555,528,287,380,496,318,456,365,395,509,533,319,424,244,217,481,420,417,368,208,342,271,232,463,236,280,314,216,377,326,373,430,251,442,499,444,434,522,488,556,217,502,378,250,409,255,293,244,426,227,484,325,266,467,291,379,394,320,546,339,508,473,426]
+    	N = x.length
+    	for(i=0; i<N; i++){
+    		tour.push({x: x[i], y:y[i]})
+    	}
+    	currEnergy = energy()
+    }
+	console.log(charCode)
+	refreash()
+}
+
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
+</script>
+</body></html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="keywords" content="Yi Zhu, Yi J Zhu, Berkeley, Harvard">
+  <meta name="description" content="Personal website for Yi Zhu.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel='stylesheet' type='text/css' href='static/style/style.css'>
+  <script src="static/script/script.js"></script>
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="static/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="static/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="static/favicon/favicon-16x16.png">
+  <link rel="manifest" href="static/favicon/site.webmanifest">
+  <link rel="mask-icon" href="static/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="static/favicon/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-config" content="static/favicon/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+  <!-- title -->
+  <script>
+    var title = window.location.pathname.split("/").pop().split(".")[0];
+    if (title=="index" || title=="") {title = "about";}
+    document.title = title.toLowerCase() + " | Yi Zhu";
+  </script>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VG7EVEDVWY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-VG7EVEDVWY');
+  </script>
+</head>
+
+<body>
+<!-- Navigation -->
+<div class="nav">
+  <div class="center">
+  <ul>
+    <li id='top-name'></li>
+    <div class="right">
+      <!-- HERE TO ADD PAGES -->
+      <li><a href="index.html" id="about">About</a></li>
+      <li><a href="cv.html" id="cv">CV</a></li>
+      <li><a href="contact.html" id="contact">Contact</a></li>
+      <li><a href="misc.html" id="misc">misc</a></li>
+    </div>
+  </ul>
+  <script>
+    document.getElementById(title).id = 'active';
+    if (title!="about") {
+      document.getElementById("top-name").innerHTML = "<span style='font-weight: bold;'>Yi J.</span> Zhu";
+    }
+  </script>
+  </div>
+</div>
+<div class="horizontal-line"></div>
+
+<div class="main-content">
+<div class="page">
+<!-- ---------------------------------------------------------------------------------------------------- -->
+<!-- START OF MAIN CONTENT -->
+<!-- ---------------------------------------------------------------------------------------------------- -->
+<h1>Miscellany</h1>
+<ul>
+  <li><a href="static/html/sa.html">Simulated Annealing</a></li>
+  <li><a href="static/pdf/chi_squared.pdf">Chi-Squared</li>
+</ul>
+
+<!-- ---------------------------------------------------------------------------------------------------- -->
+<!-- END OF MAIN CONTENT -->
+<!-- ---------------------------------------------------------------------------------------------------- -->
+</div>
+</div>
+
+<footer>
+<div class="page">
+<div class="footer-name">
+  <p style="font-size: 80%; line-height: 1.5;">
+    Copyright &copy; <script>document.write(new Date().getFullYear());</script> Yi J Zhu. All rights reserved. 
+  </p>
+</div>
+</div>
+</footer>
+
+</body>
+</html>
