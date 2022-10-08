@@ -73,8 +73,8 @@ function drawPath(city1, city2){
 // draws paths connecting city based on tour
 // updates text data
 function refreash(){
-	// context.clearRect(0, 0, ww, wh)
-	canvas.width = canvas.width
+	context.clearRect(0, 0, ww, wh)
+	// canvas.width = canvas.width
 	n = tour.length
 	for(i in tour){
 		drawCity(tour[i].x, tour[i].y)
