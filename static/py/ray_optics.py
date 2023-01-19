@@ -1,78 +1,121 @@
+'''
+Updated: Jan 2022
+'''
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
+class Ray:
+	def __init__(self, x, theta, width, c, alpha):
+		if width:
+			# [[ray 1], [ray 2]]
+			self.ray = np.array([[x-width/2,theta],[x+width/2,theta]])
+			# [[ray 1 xpos], [ray 2 xpos]]
+			self.xpos = [[x-width/2],[x+width/2]]
+			self.N = 2
+		else:
+			self.ray = np.array([[x, theta]])
+			self.xpos = [[x]]
+			self.N = 1
+
+		self.zpos = [0]
+		self.color = c
+		self.alpha = alpha
+
+	def operate(self, M, z):
+		'''
+		Evolve ray by some optical element.
+
+		Parameters:
+			M: ray matrix
+			z: the new position along the optical axis
+		'''
+		for i in range(self.N):
+			self.ray[i] = M @ self.ray[i]
+			self.xpos[i].append(self.ray[i][0])
+		self.zpos.append(z)
+
+	def plot(self, ax):
+		if self.N == 1:
+			ax.plot(self.zpos, self.xpos[0], c=self.color)
+		elif self.N == 2:
+			ax.plot(self.zpos, self.xpos[0], c=self.color)
+			ax.plot(self.zpos, self.xpos[1], c=self.color)
+			ax.fill_between(self.zpos, self.xpos[0], self.xpos[1], color=self.color, alpha=self.alpha)
 
 class RayOptics:
 	'''
 	Ray tracing with the ray transfer matrix method.
-
-	For plotting,
-		zpos: position of the ray along the axial direction
-		xpos: position of the ray along the vertical direction
-		epos: axial position of optical elements 
 	'''
-
-	def __init__(self, ray):
-		'''
-		ray: starting ray (x, theta)
-		''' 
-		self.ray = np.array(ray)
-		# axial position
+	def __init__(self):
+		self.fig, self.ax = plt.subplots()
+		self.rays = []
 		self.z = 0
-		# plotting
-		self.zpos = [self.z]
-		self.xpos = [self.ray[0]]
-		# axial location of optics elements (e.g. lenses)
-		self.epos = [] 
+
+	def ray(self, x, theta, width=0, radian=True, c='k', alpha=0.2):
+		'''
+		Initializes a ray defined by (x, theta). 
+
+		Optional parameters:
+			width: finite width if ray
+			z: offset for the starting position along the optical axis
+			c: color of beam when plotting
+			alpha: transparency of beam filling
+
+		'''
+		if not radian:
+			theta = theta*np.pi/180
+		self.rays.append(Ray(x,theta,width,c,alpha))
 
 	def propagate(self, d):
 		'''
-		Free space propagation
-		d: propagation distance
+		Free space propagation.
+
+		Parameters:
+			d: propagation distance
 		'''
-		M = np.array([[1,d],[0,1]])
-		self.ray = M@self.ray
 		self.z += d
+		M = np.array([[1,d],[0,1]])
+		for r in self.rays:
+			r.operate(M,self.z)
 
-		# update positions
-		self.zpos.append(self.z)
-		self.xpos.append(self.ray[0])
-
-	def thin_lens(self, f):
+	def thin_lens(self, f, h=-1):
 		'''
-		f: focal length
+		Passing through a thin lens.
+
+		Parameters:
+			f: focal length
+			h: height of the lens, -1 for infinite height
 		'''
 		M = np.array([[1,0],[-1/f,1]])
-		self.ray = M@self.ray
-		self.epos.append(self.z)
+		for r in self.rays:
+			r.operate(M,self.z)
 
+		if h==-1:
+			self.ax.axvline(self.z, c='k')
+		else:
+			p = patches.FancyArrowPatch((self.z,-h/2), (self.z,h/2), arrowstyle='<->', mutation_scale=20)
+			self.ax.add_patch(p)
+	def show(self):
+		for r in self.rays:
+			r.plot(self.ax)
+		plt.show()
 
-fig, ax = plt.subplots()
+# Example usage
+# RO = RayOptics()
+# RO.ray(0,1, width=0.2, c='r', radian=False)
+# RO.ray(0,0, width=0.2, c='g', radian=False)
+# RO.ray(0,-1, width=0.2, c='b', radian=False)
 
-rays = [
-	RayOptics((0.1,0)),
-	RayOptics((-0.1,0)),
-	RayOptics((0.1,1*np.pi/180)),
-	RayOptics((-0.1,1*np.pi/180)),
-	]
+# RO.propagate(100)
+# RO.thin_lens(100, h=5)
+# RO.propagate(100)
 
-cs = ['r-','r-','b-','b-']
+# RO.propagate(200)
+# RO.thin_lens(200, h=7)
+# RO.propagate(200)
+# RO.propagate(200)
+# RO.thin_lens(200, h=7)
+# RO.propagate(200)
 
-for i in range(len(rays)):
-	ray = rays[i]
-	
-	#4f
-	ray.propagate(200)
-	ray.thin_lens(200)
-	ray.propagate(400)
-	ray.thin_lens(200)
-	ray.propagate(200)
-
-	#objective
-	ray.thin_lens(5)
-	ray.propagate(5)
-	ax.plot(ray.zpos, ray.xpos, cs[i])
-
-for e in rays[0].epos:
-	ax.axvline(e, c='k')
-
-plt.show()
+# RO.show()
