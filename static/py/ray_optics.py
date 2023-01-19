@@ -79,23 +79,25 @@ class RayOptics:
 		for r in self.rays:
 			r.operate(M,self.z)
 
-	def thin_lens(self, f, h=-1):
+	def thin_lens(self, f, D=-1):
 		'''
 		Passing through a thin lens.
 
 		Parameters:
 			f: focal length
-			h: height of the lens, -1 for infinite height
+			D: diameter of the lens, -1 for unbounded size (only for drawing the lens). 
+			   we do not check if the ray falls off the lens.
 		'''
 		M = np.array([[1,0],[-1/f,1]])
 		for r in self.rays:
 			r.operate(M,self.z)
 
-		if h==-1:
+		if D==-1:
 			self.ax.axvline(self.z, c='k')
 		else:
-			p = patches.FancyArrowPatch((self.z,-h/2), (self.z,h/2), arrowstyle='<->', mutation_scale=20)
+			p = patches.FancyArrowPatch((self.z,-D/2), (self.z,D/2), arrowstyle='<->', mutation_scale=20)
 			self.ax.add_patch(p)
+
 	def show(self):
 		for r in self.rays:
 			r.plot(self.ax)
@@ -108,14 +110,14 @@ class RayOptics:
 # RO.ray(0,-1, width=0.2, c='b', radian=False)
 
 # RO.propagate(100)
-# RO.thin_lens(100, h=5)
+# RO.thin_lens(100, D=5)
 # RO.propagate(100)
 
 # RO.propagate(200)
-# RO.thin_lens(200, h=7)
+# RO.thin_lens(200, D=7)
 # RO.propagate(200)
 # RO.propagate(200)
-# RO.thin_lens(200, h=7)
+# RO.thin_lens(200, D=7)
 # RO.propagate(200)
 
 # RO.show()
