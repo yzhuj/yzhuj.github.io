@@ -57,8 +57,8 @@ class RayOptics:
 		Initializes a ray defined by (x, theta). 
 
 		Optional parameters:
-			width: finite width if ray
-			z: offset for the starting position along the optical axis
+			width: finite width of ray
+			radian: if False, theta is interpreted as degrees
 			c: color of beam when plotting
 			alpha: transparency of beam filling
 
@@ -85,8 +85,7 @@ class RayOptics:
 
 		Parameters:
 			f: focal length
-			D: diameter of the lens, -1 for unbounded size (only for drawing the lens). 
-			   we do not check if the ray falls off the lens.
+			D: diameter of the lens, -1 for unbounded size (only for drawing the lens). We do not check if the ray falls off the lens.
 		'''
 		M = np.array([[1,0],[-1/f,1]])
 		for r in self.rays:
