@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="keywords" content="Yi Zhu, Yi J Zhu, Berkeley, Harvard">
+  <meta name="description" content="Personal website for Yi Zhu.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel='stylesheet' type='text/css' href='static/style/style.css'>
+  <script src="static/script/script.js"></script>
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="static/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="static/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="static/favicon/favicon-16x16.png">
+  <link rel="manifest" href="static/favicon/site.webmanifest">
+  <link rel="mask-icon" href="static/favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="static/favicon/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-config" content="static/favicon/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+  <!-- title -->
+  <script>
+    var title = window.location.pathname.split("/").pop().split(".")[0];
+    if (title=="index" || title=="") {title = "about";}
+    document.title = title.toLowerCase() + " | Yi Zhu";
+  </script>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VG7EVEDVWY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-VG7EVEDVWY');
+  </script>
+</head>
+
+<body>
+<!-- Navigation -->
+<div class="nav">
+  <div class="center">
+  <ul>
+    <li id='top-name'></li>
+    <div class="right">
+      <!-- HERE TO ADD PAGES -->
+      <li><a href="index.html" id="about">About</a></li>
+      <li><a href="cv.html" id="cv">CV</a></li>
+      <li><a href="contact.html" id="contact">Contact</a></li>
+      <!-- <li><a href="research.html">Research</a></li> -->
+      <!-- <li><a href="notes.html">Notes</a></li> -->
+      <!-- <li><a href="portfolio.html">Portfolio</a></li> -->
+      <!-- <li><a href="miscellany.html">Miscellany</a></li> -->
+    </div>
+  </ul>
+  <script>
+    document.getElementById(title).id = 'active';
+    if (title!="about") {
+      document.getElementById("top-name").innerHTML = "<span style='font-weight: bold;'>Yi J.</span> Zhu";
+    }
+  </script>
+  </div>
+</div>
+<div class="horizontal-line"></div>
+
+<div class="main-content">
+<div class="page">
+<!-- ---------------------------------------------------------------------------------------------------- -->
+<!-- START OF MAIN CONTENT -->
+<!-- ---------------------------------------------------------------------------------------------------- -->
+
+<h1 style="text-align: center;">Time elapsed</h1>
+<div class="countup" id="countup1">
+  <span class="timeel years">00</span>
+  <span class="timeel timeRefYears">years</span>
+  <span class="timeel days">00</span>
+  <span class="timeel timeRefDays">days</span>
+  <span class="timeel hours">00</span>
+  <span class="timeel timeRefHours">hours</span>
+  <span class="timeel minutes">00</span>
+  <span class="timeel timeRefMinutes">minutes</span>
+  <span class="timeel seconds">00</span>
+  <span class="timeel timeRefSeconds">seconds</span>
+</div>
+
+<style type="text/css">
+.countup {
+  text-align: center;
+}
+.countup .timeel {
+  display: inline-block;
+  padding: 10px;
+  margin: 0;
+  color: blue;
+  min-width: 2.6rem;
+  margin-left: 13px;
+  border-radius: 10px 0 0 10px;
+}
+.countup span[class*="timeRef"] {
+  border-radius: 0 10px 10px 0;
+  margin-left: 0;
+  color: black;
+}
+</style>
+
+<script type="text/javascript">
+  window.onload = function() {
+  // Month Day, Year Hour:Minute:Second, id-of-element-container
+  countUpFromTime("Dec 16, 2022 16:36:46", 'countup1'); // ****** Change this line!
+};
+function countUpFromTime(countFrom, id) {
+  countFrom = new Date(countFrom).getTime();
+  var now = new Date(),
+      countFrom = new Date(countFrom),
+      timeDifference = (now - countFrom);
+    
+  var secondsInADay = 60 * 60 * 1000 * 24,
+      secondsInAHour = 60 * 60 * 1000;
+    
+  days = Math.floor(timeDifference / (secondsInADay) * 1);
+  years = Math.floor(days / 365);
+  if (years > 1){ days = days - (years * 365) }
+  hours = Math.floor((timeDifference % (secondsInADay)) / (secondsInAHour) * 1);
+  mins = Math.floor(((timeDifference % (secondsInADay)) % (secondsInAHour)) / (60 * 1000) * 1);
+  secs = Math.floor((((timeDifference % (secondsInADay)) % (secondsInAHour)) % (60 * 1000)) / 1000 * 1);
+
+  var idEl = document.getElementById(id);
+  idEl.getElementsByClassName('years')[0].innerHTML = years;
+  idEl.getElementsByClassName('days')[0].innerHTML = days;
+  idEl.getElementsByClassName('hours')[0].innerHTML = hours;
+  idEl.getElementsByClassName('minutes')[0].innerHTML = mins;
+  idEl.getElementsByClassName('seconds')[0].innerHTML = secs;
+
+  clearTimeout(countUpFromTime.interval);
+  countUpFromTime.interval = setTimeout(function(){ countUpFromTime(countFrom, id); }, 1000);
+}
+</script>
+
+<!-- ---------------------------------------------------------------------------------------------------- -->
+<!-- END OF MAIN CONTENT -->
+<!-- ---------------------------------------------------------------------------------------------------- -->
+</div>
+</div>
+
+<footer>
+<div class="page">
+<div class="footer-name">
+  <p style="font-size: 80%; line-height: 1.5;">
+    Copyright &copy; <script>document.write(new Date().getFullYear());</script> Yi J Zhu. All rights reserved. 
+  </p>
+</div>
+</div>
+</footer>
+
+</body>
+</html>
