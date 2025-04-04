@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Random Row from Excel</title>
+  <title>Random Event in Quantum Science History</title>
   <style>
     body {
       font-family: sans-serif;
@@ -25,17 +25,15 @@
       width: 100%;
     }
 
-    #output {
-      margin-top: 1.5em;
-      font-size: 1.1em;
-      color: #333;
-      line-height: 1.6;
+    #button-container {
+      text-align: center;
+      margin-bottom: 1.5em;
     }
 
     button {
       padding: 0.6em 1.2em;
       font-size: 1em;
-      background-color: #0066cc;
+      background-color: #A41034;
       color: white;
       border: none;
       border-radius: 6px;
@@ -44,7 +42,13 @@
     }
 
     button:hover {
-      background-color: #004999;
+      background-color: #7e0c28;
+    }
+
+    #output {
+      font-size: 1.1em;
+      color: #333;
+      line-height: 1.6;
     }
   </style>
 </head>
@@ -52,7 +56,9 @@
   <h2>A Random Event in Quantum Science History</h2>
 
   <div id="card">
-    <button onclick="showRandomRow()">Generate Now!</button>
+    <div id="button-container">
+      <button onclick="showRandomRow()">Generate Now!</button>
+    </div>
     <div id="output">Loading Excel data...</div>
   </div>
 
