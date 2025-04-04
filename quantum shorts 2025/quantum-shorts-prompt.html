@@ -3,14 +3,58 @@
 <head>
   <title>Random Row from Excel</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 2em; }
-    #output { margin-top: 1em; font-size: 1.1em; color: #333; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #f5f5f5;
+      padding: 2em;
+    }
+
+    h2 {
+      margin-bottom: 1em;
+    }
+
+    #card {
+      display: inline-block;
+      text-align: left;
+      background: white;
+      padding: 2em;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
+    }
+
+    #output {
+      margin-top: 1.5em;
+      font-size: 1.1em;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    button {
+      padding: 0.6em 1.2em;
+      font-size: 1em;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #004999;
+    }
   </style>
 </head>
 <body>
-  <h2>Get a Random Line from Excel</h2>
-  <button onclick="showRandomRow()">Get Random Row</button>
-  <div id="output">Loading Excel data...</div>
+  <h2>A Random Event in Quantum Science History</h2>
+
+  <div id="card">
+    <button onclick="showRandomRow()">Generate Now!</button>
+    <div id="output">Loading Excel data...</div>
+  </div>
 
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script src="randomLine.js"></script>

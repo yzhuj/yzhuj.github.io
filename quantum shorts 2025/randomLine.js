@@ -31,9 +31,15 @@ function showRandomRow() {
   const randomIndex = Math.floor(Math.random() * (rows.length - startIndex)) + startIndex;
   const row = rows[randomIndex];
 
-  // Format the row into a readable string
-  const display = row.slice(0, 4).map((val, i) => `Column ${i + 1}: ${val}`).join(" | ");
-  document.getElementById("output").textContent = display;
+  // Format the row with labels and line breaks
+  const display = `
+    <strong>Date:</strong> ${row[0] || "N/A"}<br>
+    <strong>Location:</strong> ${row[1] || "N/A"}<br><br>
+    ${row[2] || ""}<br><br>
+    <strong>Links:</strong> ${row[3] || "N/A"}
+  `;
+
+  document.getElementById("output").innerHTML = display;
 }
 
 window.onload = function () {
