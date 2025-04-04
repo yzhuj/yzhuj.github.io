@@ -37,5 +37,5 @@ function showRandomRow() {
 }
 
 window.onload = function () {
-  loadExcelFile("database.xlsx");
+  loadExcelFile("https://yizhuj.com/quantum%20shorts%202025/database.xlsx");
 };
