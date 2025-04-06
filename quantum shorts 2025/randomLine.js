@@ -10,45 +10,38 @@ function loadExcelFile(url) {
     })
     .then(arrayBuffer => {
       const workbook = XLSX.read(arrayBuffer, { type: "array" });
-      const sheetName = workbook.SheetNames[0]; // Use the first sheet
+      const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
-      rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-      rows = rows.filter(row => row.length > 0);
+      const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+      // Sanitize entire dataset
+      rows = rawRows
+        .map(row => row.map(cell => typeof cell === "string" ? cleanString(cell) : cell))
+        .filter(row => row.length > 0);
+
+      document.getElementById("output").textContent = "Data loaded...ready to explore!";
     })
     .catch(error => {
       console.error("Error loading Excel file:", error);
+      document.getElementById("output").textContent = "Failed to load data.";
     });
 }
 
-// Sanitize function to clean and escape HTML-sensitive characters
-function sanitize(text) {
-  if (typeof text !== "string") return text;
-
-  return text
-    .normalize("NFKC")
-    .replace(/[\u201C\u201D\u00AB\u00BB\u02DD\u301E\u301F]/g, '"')
-    .replace(/[\u2018\u2019\u02BC\u2032\u2035]/g, "'")
-    .replace(/[\u2013\u2014\u2015]/g, "-")
-    .replace(/\u2026/g, "...")
-    .replace(/[\u00A0\u200B-\u200F\uFEFF]/g, " ")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;")
-    .trim();
+function cleanString(text) {
+  const normalized = text.normalize("NFKC");
+  const div = document.createElement("div");
+  div.textContent = normalized;
+  return div.innerHTML;
 }
 
 function formatLinksFromRow(row) {
-  if (row.length <= 3) return "N/A";
-
   const links = row.slice(3).filter(cell => typeof cell === "string" && cell.trim() !== "");
   if (links.length === 0) return "N/A";
 
   return links
-    .map(link => {
-      const url = sanitize(link);
-      return `<a href="${url}" target="_blank">${url}</a>`;
+    .map((url, index) => {
+      const label = `[${index + 1}] ${url}`;
+      return `<a href="${url}" target="_blank" style="word-break: break-all;">${label}</a>`;
     })
     .join("<br>");
 }
@@ -64,9 +57,9 @@ function showRandomRow() {
   const row = rows[randomIndex];
 
   const display = `
-    <strong>Date:</strong> ${sanitize(row[0]) || "N/A"}<br>
-    <strong>Location:</strong> ${sanitize(row[1]) || "N/A"}<br><br>
-    ${sanitize(row[2]) || ""}<br><br>
+    <strong>Date:</strong> ${row[0] || "N/A"}<br>
+    <strong>Location:</strong> ${row[1] || "N/A"}<br><br>
+    ${row[2] || ""}<br><br>
     <strong>Links:</strong><br>${formatLinksFromRow(row)}
   `;
 
