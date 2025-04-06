@@ -1,37 +1,37 @@
 let rows = [];
 
-function loadHostedCSV(url) {
+function loadExcelFile(url) {
   fetch(url)
     .then(response => {
       if (!response.ok) {
-        throw new Error("Failed to load CSV file: " + response.status);
+        throw new Error("Failed to load Excel file: " + response.status);
       }
-      return response.text();
+      return response.arrayBuffer();
     })
-    .then(csvText => {
-      const allRows = csvText
-        .trim()
-        .split("\n")
-        .map(line => line.split(","));
-      
-      rows = allRows.filter(row => row.length > 0);
+    .then(arrayBuffer => {
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+      const sheetName = workbook.SheetNames[0]; // Use the first sheet
+      const sheet = workbook.Sheets[sheetName];
+      rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      rows = rows.filter(row => row.length > 0);
     })
     .catch(error => {
-      console.error("Error loading CSV file:", error);
+      console.error("Error loading Excel file:", error);
     });
 }
 
+// Sanitize function to clean and escape HTML-sensitive characters
 function sanitize(text) {
   if (typeof text !== "string") return text;
 
   return text
     .normalize("NFKC")
-    .replace(/[\u201C\u201D\u00AB\u00BB\u02DD\u301E\u301F]/g, '"')  // smart double quotes
-    .replace(/[\u2018\u2019\u02BC\u2032\u2035]/g, "'")             // smart single quotes
-    .replace(/[\u2013\u2014\u2015]/g, "-")                         // en/em dashes
-    .replace(/\u2026/g, "...")                                     // ellipsis
-    .replace(/[\u00A0\u200B-\u200F\uFEFF]/g, " ")                  // invisible spaces
-    .replace(/&/g, "&amp;")                                        // escape HTML
+    .replace(/[\u201C\u201D\u00AB\u00BB\u02DD\u301E\u301F]/g, '"')
+    .replace(/[\u2018\u2019\u02BC\u2032\u2035]/g, "'")
+    .replace(/[\u2013\u2014\u2015]/g, "-")
+    .replace(/\u2026/g, "...")
+    .replace(/[\u00A0\u200B-\u200F\uFEFF]/g, " ")
+    .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
@@ -74,6 +74,6 @@ function showRandomRow() {
 }
 
 window.onload = function () {
-  const csvURL = "https://yizhuj.com/quantum%20shorts%202025/database.csv";
-  loadHostedCSV(csvURL);
+  const excelURL = "https://yizhuj.com/quantum%20shorts%202025/database.xlsx";
+  loadExcelFile(excelURL);
 };
