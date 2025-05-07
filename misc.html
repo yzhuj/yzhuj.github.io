@@ -64,6 +64,114 @@
 <!-- ---------------------------------------------------------------------------------------------------- -->
 <!-- START OF MAIN CONTENT -->
 <!-- ---------------------------------------------------------------------------------------------------- -->
+<h1>Useful Calculations</h1>
+<p style="margin-bottom: 20px;">(click to expand)</p>
+
+<ul style="padding-left: 20px; margin-bottom: 40px;">
+  <li class="magic" onclick="appdisapp('calc1-form', true)">Laser Fluence</li>
+  <div id="calc1-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
+    <div style="margin-bottom: 10px;">
+      This script computes the fluence (power per area) of a continuous-wave Gaussian laser beam.
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Power [W]:</label>
+      <input type="number" id="calc1-power" step="any" style="width: 150px;" oninput="calc1()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Beam Waist (1/e²) [mm]:</label>
+      <input type="number" id="calc1-radius" step="any" style="width: 150px;" oninput="calc1()">
+    </div>
+    <hr class="divider-line">
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Peak power density [W/mm²]:</label>
+      <span id="calc1-result1">—</span>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Peak power density [kW/cm²]:</label>
+      <span id="calc1-result2">—</span>
+    </div>
+  </div>
+
+  <li class="magic" onclick="appdisapp('calc2-form', true)">dBm to W</li>
+  <div id="calc2-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
+    <div style="margin-bottom: 10px;">
+      This script converts power in dBm (dB wrt 1 mW) to Watts. The conversion is given by 10^(dBm/10 - 3). Therefore, +/- 10 dBm corresponds to an order-of-magnitude of power in Watts and +/- 3 dBm corresponds to a factor of 2 of power in Watts.
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Power [dBm]:</label>
+      <input type="number" id="calc2-dbm" step="any" style="width: 150px;" oninput="calc2()">
+    </div>
+    <hr class="divider-line">
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Power [W]:</label>
+      <span id="calc2-result1">—</span>
+    </div>
+  </div>
+
+  <li class="magic" onclick="appdisapp('calc3-form', true)">W to dBm</li>
+  <div id="calc3-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
+    <div style="margin-bottom: 10px;">
+      This script converts power in Watts to dBm. The conversion is given by 10 [log10(Watts) + 3]. Therefore, order-of-magnitude of power in Watts corresponds to +/- 10 dBm and a factor of 2 of power in Watts corresponds to +/- 3 dBm .
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Power [W]:</label>
+      <input type="number" id="calc3-watts" step="any" style="width: 150px;" oninput="calc3()">
+    </div>
+    <hr class="divider-line">
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Power [dBm]:</label>
+      <span id="calc3-result1">—</span>
+    </div>
+  </div>
+
+  <li class="magic" onclick="appdisapp('calc4-form', true)">Gaussian Beam Propagation</li>
+  <div id="calc4-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
+    <div style="margin-bottom: 10px;">
+      This script computes the Rayleigh range and beam waist of a Gaussian beam.
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Wavelength [nm]:</label>
+      <input type="number" id="calc4-wavelength" step="any" style="width: 150px;" oninput="calc4()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Waist (w<sub>0</sub>) [mm]:</label>
+      <input type="number" id="calc4-w0" step="any" style="width: 150px;" oninput="calc4()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Propagation (z) [mm]:</label>
+      <input type="number" id="calc4-z" step="any" style="width: 150px;" oninput="calc4()">
+    </div>
+    <hr class="divider-line">
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Rayleigh range [mm]:</label>
+      <span id="calc4-result1">—</span>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Beam waist w(z) [mm]:</label>
+      <span id="calc4-result2">—</span>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Factor w(z)/w<sub>0</sub>:</label>
+      <span id="calc4-result3">—</span>
+    </div>
+  </div>
+
+
+  <li class="magic" onclick="appdisapp('calc5-form', true)">Objective Imaging</li>
+  <div id="calc5-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
+    <div style="margin-bottom: 10px;">
+      TODO
+    </div>
+  </div>
+
+
+
+</ul>
+
+
+
+
+
 <h1>Miscellany</h1>
 <ul>
   <li>Red-detuned magneto-optical trap <a href="static/pdf/MOT.pdf">[pdf]</a></li>

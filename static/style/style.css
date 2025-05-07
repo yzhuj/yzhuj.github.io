@@ -157,6 +157,12 @@ h1 {
 .magic {
 	color: #9966ff;
 	cursor: pointer; 
-	font: italic 100% roboto, sans-serif;
+	font: 100% roboto, sans-serif;
 }
 
+.divider-line {
+	margin: 15px 0;
+	width: 70%;
+	border: none;
+	border-top: 1px solid #ccc;
+  }
