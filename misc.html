@@ -68,17 +68,17 @@
 <p style="margin-bottom: 20px;">(click to expand)</p>
 
 <ul style="padding-left: 20px; margin-bottom: 40px;">
-  <li class="magic" onclick="appdisapp('calc1-form', true)">Laser Fluence</li>
+  <li class="magic" onclick="appdisapp('calc1-form', true)">Laser Intensity</li>
   <div id="calc1-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
     <div style="margin-bottom: 10px;">
-      This script computes the fluence (power per area) of a continuous-wave Gaussian laser beam.
+      This script computes the peak intensity of a continuous-wave Gaussian laser beam.
     </div>
     <div style="margin-bottom: 10px;">
       <label style="display: inline-block; width: 220px;">Power [W]:</label>
       <input type="number" id="calc1-power" step="any" style="width: 150px;" oninput="calc1()">
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Beam Waist (1/e²) [mm]:</label>
+      <label style="display: inline-block; width: 220px;">Beam waist (1/e²) [mm]:</label>
       <input type="number" id="calc1-radius" step="any" style="width: 150px;" oninput="calc1()">
     </div>
     <hr class="divider-line">
@@ -156,11 +156,34 @@
     </div>
   </div>
 
-
   <li class="magic" onclick="appdisapp('calc5-form', true)">Objective Imaging</li>
   <div id="calc5-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
     <div style="margin-bottom: 10px;">
       TODO
+    </div>
+  </div>
+
+  <li class="magic" onclick="appdisapp('calc6-form', true)">Fiber Coupling</li>
+  <div id="calc6-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
+    <div style="margin-bottom: 10px;">
+      This script computes the focal lengh of the lens required to mode-match a free-space Gaussian beam with an optical fiber. The focal length is given by f = &pi; D&sdot;MFD/4&lambda;. The optical fiber has fixed NA; therefore, a larger beam requires a longer focal length lens compared to a smaller beam.
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Wavelength [nm]:</label>
+      <input type="number" id="calc6-wavelength" step="any" style="width: 150px;" oninput="calc6()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Beam diameter (2w<sub>0</sub>) [mm]:</label>
+      <input type="number" id="calc6-D" step="any" style="width: 150px;" oninput="calc6()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Mode field diameter [&mu;m]:</label>
+      <input type="number" id="calc6-mfd" step="any" style="width: 150px;" oninput="calc6()">
+    </div>
+    <hr class="divider-line">    
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">f [mm]:</label>
+      <span id="calc6-result1">—</span>
     </div>
   </div>
 

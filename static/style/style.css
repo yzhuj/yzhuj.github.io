@@ -160,9 +160,32 @@ h1 {
 	font: 100% roboto, sans-serif;
 }
 
+.magic-bold {
+	font-weight: bold;
+}
+
 .divider-line {
 	margin: 15px 0;
 	width: 70%;
 	border: none;
 	border-top: 1px solid #ccc;
-  }
+}
+
+.custom-table {
+	border-collapse: collapse;
+	margin-top: 10px;
+	width: 100%;
+	max-width: 600px;
+}
+
+.custom-table th,
+.custom-table td {
+	border: 1px solid #ccc;
+	padding: 8px;
+	text-align: left;
+}
+
+.custom-table th {
+	background-color: #f2f2f2;
+}
+  

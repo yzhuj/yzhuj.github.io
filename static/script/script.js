@@ -29,8 +29,8 @@ function calc1() {
 	const area_mm2 = Math.PI * radius_mm * radius_mm;
 	const density_mm = 2 * power_W / area_mm2;
   
-	document.getElementById("calc1-result1").textContent = density_mm.toFixed(2);
-	document.getElementById("calc1-result2").textContent = (density_mm/10.0).toFixed(2);
+	document.getElementById("calc1-result1").textContent = Number(density_mm.toPrecision(3));
+	document.getElementById("calc1-result2").textContent = Number((density_mm/10.0).toPrecision(3));
   }
 
 function calc2() {
@@ -78,5 +78,23 @@ function calc4() {
 	w = w0 * Math.sqrt(1 + Math.pow(z/rayleigh, 2));
 	document.getElementById("calc4-result2").textContent = Number(w.toPrecision(4));
 	document.getElementById("calc4-result3").textContent = Number((w/w0).toPrecision(3));
+}
+
+
+function calc6() {
+	let wavelength = document.getElementById("calc6-wavelength").value;
+	const D = document.getElementById("calc6-D").value;
+	let MFD = document.getElementById("calc6-mfd").value;
+
+	if (isBad(wavelength) || isBad(D) || isBad(MFD)) {
+		document.getElementById("calc6-result1").textContent = "—";
+		console.log('here')
+		return;
+	}
+
+	wavelength = wavelength/1e6;
+	MFD = MFD/1e3;
+	f = Math.PI * D * MFD / (4 * wavelength)
+	document.getElementById("calc6-result1").textContent = Number(f.toPrecision(3));
 }
   
