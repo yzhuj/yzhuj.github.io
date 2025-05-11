@@ -80,6 +80,33 @@ function calc4() {
 	document.getElementById("calc4-result3").textContent = Number((w/w0).toPrecision(3));
 }
 
+function calc5() {
+	let wavelength = document.getElementById("calc5-wavelength").value;
+	const EPD = document.getElementById("calc5-EPD").value;
+	const EFL = document.getElementById("calc5-EFL").value;
+
+	if (isBad(wavelength) || isBad(EPD) || isBad(EFL)) {
+		document.getElementById("calc5-result1").textContent = "—";
+		document.getElementById("calc5-result2").textContent = "—";
+		return;
+	}
+
+	wavelength = wavelength/1e6;
+	resolution = 1.22 * wavelength * EFL / EPD
+	document.getElementById("calc5-result1").textContent = Number((resolution*1e3).toPrecision(3));
+
+	let dpx = document.getElementById("calc5-dpx").value;
+	const npx = document.getElementById("calc5-npx").value;
+	if (isBad(dpx) || isBad(npx)) {
+		document.getElementById("calc5-result2").textContent = "—";
+		return;	
+	}
+	dpx = dpx/1e3;
+
+	f = npx * dpx * EPD / (2.44 * wavelength)
+	document.getElementById("calc5-result2").textContent = Number(f.toPrecision(3));
+}
+
 
 function calc6() {
 	let wavelength = document.getElementById("calc6-wavelength").value;
@@ -88,7 +115,6 @@ function calc6() {
 
 	if (isBad(wavelength) || isBad(D) || isBad(MFD)) {
 		document.getElementById("calc6-result1").textContent = "—";
-		console.log('here')
 		return;
 	}
 

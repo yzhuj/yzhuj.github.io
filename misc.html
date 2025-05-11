@@ -158,8 +158,42 @@
 
   <li class="magic" onclick="appdisapp('calc5-form', true)">Objective Imaging</li>
   <div id="calc5-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
+    
     <div style="margin-bottom: 10px;">
-      TODO
+      <img src="static/svg/objective.svg" style="width: 50%; display: block; margin-bottom: 10px;">
+      <a href="static/svg/objective.svg">[link to image]</a>
+    </div>
+    <div style="margin-bottom: 10px;">
+      This script computes the required imaging lens focal length given the objective entrance pupil diameter (EPD) and effective focal length (EFL); as well as the camera properties.
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Wavelength [nm]:</label>
+      <input type="number" id="calc5-wavelength" step="any" style="width: 150px;" oninput="calc5()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Objective EPD [mm]:</label>
+      <input type="number" id="calc5-EPD" step="any" style="width: 150px;" oninput="calc5()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Objective EFL [mm]:</label>
+      <input type="number" id="calc5-EFL" step="any" style="width: 150px;" oninput="calc5()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Pixel size [&mu;m]:</label>
+      <input type="number" id="calc5-dpx" step="any" style="width: 150px;" oninput="calc5()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Pixels per spot (n<sub>px</sub>) [mm]:</label>
+      <input type="number" id="calc5-npx" step="any" style="width: 150px;" oninput="calc5()">
+    </div>
+    <hr class="divider-line">    
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Objective resolution [&mu;m]:</label>
+      <span id="calc5-result1">—</span>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: 220px;">Imaging focal length [mm]:</label>
+      <span id="calc5-result2">—</span>
     </div>
   </div>
 
