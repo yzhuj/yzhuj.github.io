@@ -6,6 +6,11 @@
   <meta name="description" content="Personal website for Yi Zhu.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel='stylesheet' type='text/css' href='static/style/style.css'>
+  <style>
+    :root {
+      --calc-label-width: 250px;
+    }
+  </style>
   <script src="static/script/script.js"></script>
   <!-- favicon -->
   <link rel="apple-touch-icon" sizes="180x180" href="static/favicon/apple-touch-icon.png">
@@ -73,54 +78,77 @@
     <div style="margin-bottom: 10px;">
       This script computes the peak intensity of a continuous-wave Gaussian laser beam.
     </div>
-    <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Power [W]:</label>
+    <hr class="divider-line">    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Power [W]:</label>
       <input type="number" id="calc1-power" step="any" style="width: 150px;" oninput="calc1()">
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Beam waist (1/e²) [mm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Beam waist (1/e²) [mm]:</label>
       <input type="number" id="calc1-radius" step="any" style="width: 150px;" oninput="calc1()">
     </div>
     <hr class="divider-line">
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Peak power density [W/mm²]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Peak power density [W/mm²]:</label>
       <span id="calc1-result1">—</span>
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Peak power density [kW/cm²]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Peak power density [mW/cm²]:</label>
+      <span id="calc1-result3">—</span>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Peak power density [kW/cm²]:</label>
       <span id="calc1-result2">—</span>
     </div>
   </div>
 
-  <li class="magic" onclick="appdisapp('calc2-form', true)">dBm to W</li>
+  <li class="magic" onclick="appdisapp('calc2-form', true)">Convert between W, dBm, Vpp, and Vrms</li>
   <div id="calc2-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
     <div style="margin-bottom: 10px;">
-      This script converts power in dBm (dB wrt 1 mW) to Watts. The conversion is given by 10^(dBm/10 - 3). Therefore, +/- 10 dBm corresponds to an order-of-magnitude of power in Watts and +/- 3 dBm corresponds to a factor of 2 of power in Watts.
-    </div>
-    <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Power [dBm]:</label>
-      <input type="number" id="calc2-dbm" step="any" style="width: 150px;" oninput="calc2()">
-    </div>
-    <hr class="divider-line">
-    <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Power [W]:</label>
-      <span id="calc2-result1">—</span>
-    </div>
-  </div>
-
-  <li class="magic" onclick="appdisapp('calc3-form', true)">W to dBm</li>
-  <div id="calc3-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
-    <div style="margin-bottom: 10px;">
-      This script converts power in Watts to dBm. The conversion is given by 10 [log10(Watts) + 3]. Therefore, order-of-magnitude of power in Watts corresponds to +/- 10 dBm and a factor of 2 of power in Watts corresponds to +/- 3 dBm .
-    </div>
-    <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Power [W]:</label>
-      <input type="number" id="calc3-watts" step="any" style="width: 150px;" oninput="calc3()">
+      This script converts between:
+      <ul style="margin-top: 5px; margin-bottom: 10px;">
+        <li><strong>W</strong>: 1 Watt = 30 dBm = 20 Vpp = 7.07 Vrms</li>
+        <li><strong>dBm</strong>: dB relative to 1 mW. ± 10 dBm = order of magnitude change in Watts; ± 3 dBm ~ factor of 2 change in Watts</li>
+        <li><strong>Vpp</strong>: Volts peak-to-peak of a sine wave</li>
+        <li><strong>Vrms</strong>: Root mean square voltage (effective DC voltage with the same power as the AC signal)</li>
+      </ul>
     </div>
     <hr class="divider-line">
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Power [dBm]:</label>
-      <span id="calc3-result1">—</span>
+      <label style="display: inline-block; width: var(--calc-label-width);">Load [Ohm]:</label>
+      <input type="number" id="calc2-R" step="any" style="width: 150px;" value="50" oninput="calc2()">
+    </div>
+    <hr class="divider-line">
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Input unit:</label>
+      <input type="radio" id="calc2-unit-w" name="calc2-unit" value="W" checked onchange="calc2()">
+      <label for="calc2-unit-w" style="margin-right: 15px;">W</label>
+      <input type="radio" id="calc2-unit-dbm" name="calc2-unit" value="dBm" onchange="calc2()">
+      <label for="calc2-unit-dbm" style="margin-right: 15px;">dBm</label>
+      <input type="radio" id="calc2-unit-vpp" name="calc2-unit" value="Vpp" onchange="calc2()">
+      <label for="calc2-unit-vpp" style="margin-right: 15px;">Vpp</label>
+      <input type="radio" id="calc2-unit-vrms" name="calc2-unit" value="Vrms" onchange="calc2()">
+      <label for="calc2-unit-vrms">Vrms</label>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Input value:</label>
+      <input type="number" id="calc2-input" step="any" style="width: 150px;" oninput="calc2()">
+    </div>
+    <hr class="divider-line">
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Power [W]:</label>
+      <span id="calc2-result-w">—</span>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Power [dBm]:</label>
+      <span id="calc2-result-dbm">—</span>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Voltage [Vpp]:</label>
+      <span id="calc2-result-vpp">—</span>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Voltage [Vrms]:</label>
+      <span id="calc2-result-vrms">—</span>
     </div>
   </div>
 
@@ -129,29 +157,30 @@
     <div style="margin-bottom: 10px;">
       This script computes the Rayleigh range and beam waist of a Gaussian beam.
     </div>
+    <hr class="divider-line">
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Wavelength [nm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Wavelength [nm]:</label>
       <input type="number" id="calc4-wavelength" step="any" style="width: 150px;" oninput="calc4()">
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Waist (w<sub>0</sub>) [mm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Waist (w<sub>0</sub>) [mm]:</label>
       <input type="number" id="calc4-w0" step="any" style="width: 150px;" oninput="calc4()">
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Propagation (z) [mm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Propagation (z) [mm]:</label>
       <input type="number" id="calc4-z" step="any" style="width: 150px;" oninput="calc4()">
     </div>
     <hr class="divider-line">
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Rayleigh range [mm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Rayleigh range [mm]:</label>
       <span id="calc4-result1">—</span>
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Beam waist w(z) [mm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Beam waist w(z) [mm]:</label>
       <span id="calc4-result2">—</span>
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Factor w(z)/w<sub>0</sub>:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Factor w(z)/w<sub>0</sub>:</label>
       <span id="calc4-result3">—</span>
     </div>
   </div>
@@ -166,33 +195,34 @@
     <div style="margin-bottom: 10px;">
       This script computes the required imaging lens focal length given the objective entrance pupil diameter (EPD) and effective focal length (EFL); as well as the camera properties.
     </div>
+    <hr class="divider-line">
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Wavelength [nm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Wavelength [nm]:</label>
       <input type="number" id="calc5-wavelength" step="any" style="width: 150px;" oninput="calc5()">
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Objective EPD [mm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Objective EPD [mm]:</label>
       <input type="number" id="calc5-EPD" step="any" style="width: 150px;" oninput="calc5()">
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Objective EFL [mm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Objective EFL [mm]:</label>
       <input type="number" id="calc5-EFL" step="any" style="width: 150px;" oninput="calc5()">
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Pixel size [&mu;m]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Pixel size [&mu;m]:</label>
       <input type="number" id="calc5-dpx" step="any" style="width: 150px;" oninput="calc5()">
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Pixels per spot (n<sub>px</sub>) [mm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Pixels per spot (n<sub>px</sub>) [mm]:</label>
       <input type="number" id="calc5-npx" step="any" style="width: 150px;" oninput="calc5()">
     </div>
     <hr class="divider-line">    
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Objective resolution [&mu;m]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Objective resolution [&mu;m]:</label>
       <span id="calc5-result1">—</span>
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Imaging focal length [mm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Imaging focal length [mm]:</label>
       <span id="calc5-result2">—</span>
     </div>
   </div>
@@ -202,21 +232,22 @@
     <div style="margin-bottom: 10px;">
       This script computes the focal lengh of the lens required to mode-match a free-space Gaussian beam with an optical fiber. The focal length is given by f = &pi; D&sdot;MFD/4&lambda;. The optical fiber has fixed NA; therefore, a larger beam requires a longer focal length lens compared to a smaller beam.
     </div>
+    <hr class="divider-line">
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Wavelength [nm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Wavelength [nm]:</label>
       <input type="number" id="calc6-wavelength" step="any" style="width: 150px;" oninput="calc6()">
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Beam diameter (2w<sub>0</sub>) [mm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Beam diameter (2w<sub>0</sub>) [mm]:</label>
       <input type="number" id="calc6-D" step="any" style="width: 150px;" oninput="calc6()">
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">Mode field diameter [&mu;m]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Mode field diameter [&mu;m]:</label>
       <input type="number" id="calc6-mfd" step="any" style="width: 150px;" oninput="calc6()">
     </div>
     <hr class="divider-line">    
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: 220px;">f [mm]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">f [mm]:</label>
       <span id="calc6-result1">—</span>
     </div>
   </div>

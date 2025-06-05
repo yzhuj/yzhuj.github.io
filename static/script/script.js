@@ -31,17 +31,53 @@ function calc1() {
   
 	document.getElementById("calc1-result1").textContent = Number(density_mm.toPrecision(3));
 	document.getElementById("calc1-result2").textContent = Number((density_mm/10.0).toPrecision(3));
+	document.getElementById("calc1-result3").textContent = Number((density_mm*1e5).toPrecision(3));
   }
 
 function calc2() {
-	const dbm = document.getElementById("calc2-dbm").value;
-	if (isBad(dbm)){
-		document.getElementById("calc2-result1").textContent = "—";
+	const inputValue = parseFloat(document.getElementById("calc2-input").value);
+	const loadR = parseFloat(document.getElementById("calc2-R").value);	
+	const selectedUnit = document.querySelector('input[name="calc2-unit"]:checked').value;
+	
+	if (isBad(inputValue) || isBad(loadR) || loadR <= 0) {
+		document.getElementById("calc2-result-w").textContent = "—";
+		document.getElementById("calc2-result-dbm").textContent = "—";
+		document.getElementById("calc2-result-vpp").textContent = "—";
+		document.getElementById("calc2-result-vrms").textContent = "—";
 		return;
 	}
-
-	const watts = Math.pow(10, (dbm - 30) / 10);
-	document.getElementById("calc2-result1").textContent = Number(watts.toPrecision(3));
+	
+	let powerW;
+	
+	// Convert input to watts first
+	switch(selectedUnit) {
+		case 'W':
+			powerW = inputValue;
+			break;
+		case 'dBm':
+			powerW = Math.pow(10, (inputValue - 30) / 10);
+			break;
+		case 'Vpp':
+			// Vpp to Vrms: Vrms = Vpp / (2 * sqrt(2))
+			// Power = Vrms^2 / R
+			const vrmsFromVpp = inputValue / (2 * Math.sqrt(2));
+			powerW = (vrmsFromVpp * vrmsFromVpp) / loadR;
+			break;
+		case 'Vrms':
+			// Power = Vrms^2 / R
+			powerW = (inputValue * inputValue) / loadR;
+			break;
+	}
+	
+	// Convert watts to all other units
+	const powerDbm = 10 * Math.log10(powerW) + 30;
+	const vrms = Math.sqrt(powerW * loadR);
+	const vpp = vrms * 2 * Math.sqrt(2);
+	
+	document.getElementById("calc2-result-w").textContent = Number(powerW.toPrecision(3));
+	document.getElementById("calc2-result-dbm").textContent = Number(powerDbm.toPrecision(3));
+	document.getElementById("calc2-result-vpp").textContent = Number(vpp.toPrecision(3));
+	document.getElementById("calc2-result-vrms").textContent = Number(vrms.toPrecision(3));
 }
   
 function calc3() {
