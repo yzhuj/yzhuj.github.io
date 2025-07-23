@@ -146,17 +146,26 @@ function calc5() {
 
 function calc6() {
 	let wavelength = document.getElementById("calc6-wavelength").value;
-	const D = document.getElementById("calc6-D").value;
+	let D = document.getElementById("calc6-D").value;
 	let MFD = document.getElementById("calc6-mfd").value;
 
-	if (isBad(wavelength) || isBad(D) || isBad(MFD)) {
+	if (isBad(wavelength) || isBad(MFD)) {
 		document.getElementById("calc6-result1").textContent = "—";
+		document.getElementById("calc6-result2").textContent = "—";
 		return;
 	}
 
-	wavelength = wavelength/1e6;
-	MFD = MFD/1e3;
+	wavelength = wavelength/1e9;
+	MFD = MFD/1e6;
+	NA = 2 * wavelength / (Math.PI * MFD)
+	document.getElementById("calc6-result2").textContent = Number(NA.toPrecision(3));
+
+	if (isBad(D)) {
+		document.getElementById("calc6-result1").textContent = "—";
+		return;
+	}
+	D = D/1e3;
 	f = Math.PI * D * MFD / (4 * wavelength)
-	document.getElementById("calc6-result1").textContent = Number(f.toPrecision(3));
+	document.getElementById("calc6-result1").textContent = Number((f*1e3).toPrecision(3));
 }
   

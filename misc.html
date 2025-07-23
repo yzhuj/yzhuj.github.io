@@ -230,6 +230,41 @@
   <li class="magic" onclick="appdisapp('calc6-form', true)">Fiber Coupling</li>
   <div id="calc6-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
     <div style="margin-bottom: 10px;">
+      This script computes the focal lengh of the lens required to mode-match a free-space Gaussian beam with an optical fiber. The focal length is given by f = &pi; D&sdot;MFD/4&lambda;. The optical fiber has fixed NA; therefore, a larger beam requires a longer focal length lens compared to a smaller beam. In the ray picture, the diameter of the collimated beam is D = 2f&sdot;NA where NA is the numerical aperture of the fiber.
+    </div>
+    <hr class="divider-line">
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Wavelength [nm]:</label>
+      <input type="number" id="calc6-wavelength" step="any" style="width: 150px;" oninput="calc6()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Mode field diameter [&mu;m]:</label>
+      <input type="number" id="calc6-mfd" step="any" style="width: 150px;" oninput="calc6()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Beam diameter (2w<sub>0</sub>) [mm]:</label>
+      <input type="number" id="calc6-D" step="any" style="width: 150px;" oninput="calc6()">
+    </div>
+    <hr class="divider-line">    
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">f [mm]:</label>
+      <span id="calc6-result1">—</span>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">NA:</label>
+      <span id="calc6-result2">—</span>
+    </div>
+  </div>
+
+  <!-- ## finesse given R1, R2
+  ## mode size
+  ## why PDH lock in reflection
+  ## ring-down  finesse
+  ## FSR given cavity length -->
+
+  <li class="magic" onclick="appdisapp('calc7-form', true)">Fabry-Pérot Cavity</li>
+  <div id="calc7-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
+    <div style="margin-bottom: 10px;">
       This script computes the focal lengh of the lens required to mode-match a free-space Gaussian beam with an optical fiber. The focal length is given by f = &pi; D&sdot;MFD/4&lambda;. The optical fiber has fixed NA; therefore, a larger beam requires a longer focal length lens compared to a smaller beam.
     </div>
     <hr class="divider-line">
