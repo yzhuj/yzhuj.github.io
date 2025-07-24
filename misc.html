@@ -76,10 +76,11 @@
   <li class="magic" onclick="appdisapp('calc1-form', true)">Laser Intensity</li>
   <div id="calc1-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
     <div style="margin-bottom: 10px;">
-      This script computes the peak intensity of a continuous-wave Gaussian laser beam.
+      This script computes the peak intensity of a continuous-wave Gaussian laser beam. The peak intensity is twice the average intensity.
     </div>
-    <hr class="divider-line">    <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: var(--calc-label-width);">Power [W]:</label>
+    <hr class="divider-line">
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Power:</label>
       <input type="number" id="calc1-power" step="any" style="width: 150px;" oninput="calc1()">
     </div>
     <div style="margin-bottom: 10px;">
@@ -88,16 +89,25 @@
     </div>
     <hr class="divider-line">
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: var(--calc-label-width);">Peak power density [W/mm²]:</label>
-      <span id="calc1-result1">—</span>
+      <input type="radio" id="calc1-power-mw" name="calc1-power-unit" value="mW" onchange="calc1()">
+      <label for="calc1-power-mw" style="margin-right: 15px;">mW</label>
+      <input type="radio" id="calc1-power-w" name="calc1-power-unit" value="W" checked onchange="calc1()">
+      <label for="calc1-power-w" style="margin-right: 15px;">W</label>
+      <input type="radio" id="calc1-power-kw" name="calc1-power-unit" value="kW" onchange="calc1()">
+      <label for="calc1-power-kw">kW</label>
     </div>
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: var(--calc-label-width);">Peak power density [mW/cm²]:</label>
-      <span id="calc1-result3">—</span>
+      <input type="radio" id="calc1-area-mm2" name="calc1-area-unit" value="mm^2" onchange="calc1()">
+      <label for="calc1-area-mm2" style="margin-right: 15px;">mm<sup>2</sup></label>
+      <input type="radio" id="calc1-area-cm2" name="calc1-area-unit" value="cm^2" checked onchange="calc1()">
+      <label for="calc1-area-cm2" style="margin-right: 15px;">cm<sup>2</sup></label>
+      <input type="radio" id="calc1-area-m2" name="calc1-area-unit" value="m^2" onchange="calc1()">
+      <label for="calc1-area-m2">m<sup>2</sup></label>
     </div>
+    <hr class="divider-line">
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: var(--calc-label-width);">Peak power density [kW/cm²]:</label>
-      <span id="calc1-result2">—</span>
+      <label id="calc1-result-label" style="display: inline-block; width: var(--calc-label-width);">Peak power density [W/cm<sup>2</sup>]:</label>
+      <span id="calc1-result">—</span>
     </div>
   </div>
 

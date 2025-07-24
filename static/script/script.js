@@ -19,20 +19,40 @@ function isBad(val) {
 function calc1() {
 	const power_W = parseFloat(document.getElementById("calc1-power").value);
 	const radius_mm = parseFloat(document.getElementById("calc1-radius").value);
+	
+	const powerUnit = document.querySelector('input[name="calc1-power-unit"]:checked').value;
+	const areaUnit = document.querySelector('input[name="calc1-area-unit"]:checked').value;
+	document.getElementById("calc1-result-label").innerHTML = `Peak power density [${powerUnit}/${areaUnit.replace('^2', '<sup>2</sup>')}]:`;
   
 	if (isBad(power_W) || isBad(radius_mm) || radius_mm <= 0) {
-		document.getElementById("calc1-result1").textContent = "—";
-		document.getElementById("calc1-result2").textContent = "—";
+		document.getElementById("calc1-result").textContent = "—";
 		return;
 	}
-  
-	const area_mm2 = Math.PI * radius_mm * radius_mm;
-	const density_mm = 2 * power_W / area_mm2;
-  
-	document.getElementById("calc1-result1").textContent = Number(density_mm.toPrecision(3));
-	document.getElementById("calc1-result2").textContent = Number((density_mm/10.0).toPrecision(3));
-	document.getElementById("calc1-result3").textContent = Number((density_mm*1e5).toPrecision(3));
-  }
+	
+	// move to user-specified units
+	let power;
+	if (powerUnit == 'mW') {
+		power = power_W * 1e3;
+	} else if (powerUnit == 'W') {
+		power = power_W;
+	} else if (powerUnit == 'kW') {
+		power = power_W * 1e-3
+	}
+
+	let radius;
+	if (areaUnit == 'mm^2') {
+		radius = radius_mm;
+	} else if (areaUnit == 'cm^2') {
+		radius = radius_mm*1e-1;
+	} else if (areaUnit == 'm^2') {
+		radius = radius_mm*1e-3;
+	}
+
+	const area = Math.PI * radius * radius;
+	const density = 2 * power / area;
+	
+	document.getElementById("calc1-result").textContent = Number(density.toPrecision(3));
+}
 
 function calc2() {
 	const inputValue = parseFloat(document.getElementById("calc2-input").value);
