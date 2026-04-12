@@ -1,0 +1,105 @@
+\documentclass{article}
+\usepackage[letterpaper, portrait, margin=2cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue]{hyperref}
+
+\usepackage{paracol}
+\usepackage{scrextend}
+\usepackage{xcolor}
+\setlength{\parindent}{0cm}
+
+\usepackage[
+backend=biber,
+style=nature,
+sorting=ydnt,
+maxbibnames=10]{biblatex}
+\addbibresource{ref.bib}
+
+\nocite{*}
+
+\newcommand{\row}[2]{
+	\columnratio{0.15,0.85}
+	\setlength{\columnsep}{1.5em}
+	\begin{paracol}{2}
+		\switchcolumn[0]
+		#1
+		\switchcolumn[1]
+		#2
+	\end{paracol}
+}
+\newcommand{\plainsection}[1]{\textsc{\textbf{#1}}}
+\newcommand{\cvsection}[1]{\vspace{1.5em}\plainsection{#1}\vspace{2pt}}
+\newcommand{\tabbed}[1]{\begin{addmargin}{2em}#1\end{addmargin}}
+\newcommand{\updateinfo}[1][\today]{\par\vfill{\scriptsize\color{gray}Updated on #1}}
+\newenvironment{infotable}{\hspace*{-\leftmargin}\hspace{2em}\begin{tabular}{p{6cm} | @{\hskip 1.5em}  p{3.5cm}}}{\end{tabular}}
+\newenvironment{infotable2}{\hspace*{-\leftmargin}\hspace{2em}\begin{tabular}{p{1.3cm} @{\hskip 1.5em}  p{5cm}}}{\end{tabular}}
+\begin{document}
+	
+\begin{center}
+	\Large
+	\textbf{\textsc{Yi J. Zhu}}
+	\vspace{1em}
+\end{center}
+
+%\row{\plainsection{Contact\\Information}}{
+%	\begin{infotable}
+%		Perkins \#312            					&yizhu@g.harvard.edu\\
+%		35 Oxford St.            					&yizhuj.com\\
+%		Cambridge, MA 02138            		&\\
+%	\end{infotable}
+%}
+
+\row{\plainsection{Contact\\Information}}{
+	\begin{infotable2}
+		\textsc{Email:} & yizhu@g.harvard.edu\\
+		\textsc{Address:} & 60 Oxford Street\\
+		&Cambridge, MA 02138\\
+	\end{infotable2}
+}
+
+\cvsection{Education}
+
+\row{\textit{2022--present}}{
+	\textsc{Harvard University}\hfill Cambridge, MA\\
+	Ph.D. Quantum Science and Engineering
+}
+\bigskip
+\row{\textit{2022}}{
+	\textsc{University of California, Berkeley}\hfill Berkeley, CA\\
+	B.S. Engineering Physics\\
+	\textit{Advisor: Hartmut H\"{a}ffner \& Sara Mouradian}
+}
+
+\cvsection{Fellowships\\\& Honors}
+\row{\textit{2023}}{AWS Generation Q G2 Graduate Fellowship}
+\row{\textit{2021}}{Berkeley Physics Undergraduate Research Scholarship}
+\row{\textit{2019}}{Edward Frank Kraft Scholarship, UC Berkeley}
+\row{\textit{2016}}{Siemens Competition Regional Finalist}
+
+\cvsection{Outreach}
+\row{\textit{2023--present}}{
+	Harvard Quantum Initiative Blog
+	\tabbed{\textit{The \href{https://www.hqi-blog.com/home}{HQI Blog} engages high school and college students with the quantum science community at Harvard. Through explainer articles and insights into the daily life of researchers, the blog aims to make quantum science accessible and interesting. Additionally, the HQI Blog hosts the Quantum Shorts Contest, where high school students submit short videos on quantum-related topics. Contest winners are invited to Harvard for lab tours, seminars, and direct interactions with the Harvard quantum research community.}}
+}
+\row{\textit{2019-2022}}{
+	Physics \& Astronomy ULAB (Undergraduate Lab At Berkeley) DeCal\\
+	Lead Instructor (2020-2022); Instructor (2019-2020)
+	\tabbed{\textit{ULAB Physics \& Astronomy is a DeCal course at UC Berkeley that offers a two-semester, 2-unit sequence to help students from underrepresented backgrounds begin their research journeys. Guided by peer mentors, students undertake year-long research projects, complemented by weekly lectures on technical skills. Enrollment averaged 50-60 students in 2021-22.}}
+}
+\row{\textit{2022}}{Mentor, Summer Math and Science Honors (SMASH) Academy, Pyle-Sadoulet Group}
+\row{\textit{2021}}{Teacher, Bay Area Scientists in Schools at Berkeley (BASIS)}
+\row{\textit{2019-2021}}{Teacher, Splash at Berkeley}
+
+\cvsection{Teaching}
+\row{\textit{FA19--SP22}}{Instructor, Astronomy 98: Undergraduate Lab at Berkeley Physics \& Astronomy}
+\row{\textit{FA21}}{Reader, Physics C191/291: Quantum Information Science and Technology}
+\row{\textit{SP21}}{Reader, Physics 110A: Electromagnetism and Optics}
+\row{\textit{FA20}}{Reader, Physics 5B: Introductory Electromagnetism, Waves, and Optics}
+
+%\cvsection{Posters}
+%\printbibliography[heading=none,keyword=poster]
+
+\updateinfo
+
+\end{document} 

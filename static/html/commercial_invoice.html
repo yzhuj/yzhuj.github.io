@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="Free fillable commercial invoice template for export, customs, and international shipping. Save in the browser, print or save as PDF. HS codes, consignee, shipper, totals, and declaration fields."
+  />
+  <meta
+    name="keywords"
+    content="commercial invoice, fillable commercial invoice, customs invoice, export invoice, international shipping invoice, PDF invoice template, HS code, consignee, shipper exporter, pro forma invoice, trade documentation, Yi Zhu"
+  />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Yi Zhu" />
+  <link rel="canonical" href="https://yzhuj.github.io/static/html/commercial_invoice.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Commercial Invoice Fillable" />
+  <meta
+    property="og:description"
+    content="Free fillable commercial invoice for customs and export: save locally, print or PDF, with line items, HS numbers, freight, and signatures."
+  />
+  <meta property="og:url" content="https://yzhuj.github.io/static/html/commercial_invoice.html" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:site_name" content="Yi Zhu" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Commercial Invoice Fillable" />
+  <meta
+    name="twitter:description"
+    content="Free fillable commercial invoice template for export and customs. Browser save, print, or PDF."
+  />
+  <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png" />
+  <link rel="manifest" href="../favicon/site.webmanifest" />
+  <link rel="mask-icon" href="../favicon/safari-pinned-tab.svg" color="#5bbad5" />
+  <link rel="shortcut icon" href="../favicon/favicon.ico" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="msapplication-config" content="../favicon/browserconfig.xml" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Commercial Invoice Fillable</title>
+  <!-- Google Analytics (gtag.js), same measurement ID as rest of site -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VG7EVEDVWY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-VG7EVEDVWY");
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Commercial Invoice Fillable",
+      "description": "Fillable commercial invoice template for international trade, customs, and export documentation. Save in browser, print or PDF.",
+      "url": "https://yzhuj.github.io/static/html/commercial_invoice.html",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Yi Zhu"
+      }
+    }
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f4f6;
+      color: #111;
+    }
+
+    .page {
+      width: 1080px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border: 1px solid #bbb;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .print-tip-banner {
+      margin-bottom: 16px;
+      padding: 10px 12px;
+      background: #eff6ff;
+      border: 1px solid #93c5fd;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: #1e3a5f;
+    }
+
+    button {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+      font-size: 14px;
+    }
+
+    button.secondary {
+      background: #6b7280;
+    }
+
+    button.danger {
+      background: #b91c1c;
+    }
+
+    .invoice-shell {
+      border: 2px solid #000;
+    }
+
+    .title-row {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      border-bottom: 2px solid #000;
+      min-height: 72px;
+    }
+
+    .title-left,
+    .title-right {
+      padding: 10px;
+    }
+
+    .title-right {
+      padding: 6px 8px;
+    }
+
+    .title-left {
+      border-right: 2px solid #000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .title-left h1 {
+      margin: 0;
+      font-size: 21px;
+      letter-spacing: 0.35px;
+      text-transform: uppercase;
+      line-height: 1.15;
+      white-space: nowrap;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      height: 100%;
+    }
+
+    /* Internal dividers only — avoids a heavy “box inside a box” on the header right */
+    .mini-box {
+      padding: 5px 8px;
+      border-right: 1px solid #000;
+      border-bottom: 1px solid #000;
+    }
+
+    .mini-box:nth-child(2n) {
+      border-right: none;
+    }
+
+    .mini-box:nth-child(3),
+    .mini-box:nth-child(4) {
+      border-bottom: none;
+    }
+
+    .mini-label {
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .mini-box input {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-size: 13px;
+      background: transparent;
+    }
+
+    /* Shorter rows: shipment detail fields */
+    .section-compact .box {
+      min-height: 0;
+      padding: 3px 6px;
+    }
+
+    .section-compact .label {
+      font-size: 9px;
+      margin-bottom: 2px;
+      line-height: 1.15;
+      word-break: break-word;
+    }
+
+    .section-compact input[type="text"],
+    .section-compact input[type="number"] {
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    /* Screen-only: make editable fields easier to spot (print stays clean via @media print rules) */
+    @media screen {
+      .invoice-shell input[type="text"],
+      .invoice-shell input[type="number"],
+      .invoice-shell textarea {
+        background: #f8fafc;
+        border: 1px dashed #94a3b8;
+        border-radius: 2px;
+        padding: 3px 5px;
+      }
+
+      .invoice-shell textarea {
+        padding: 4px 5px;
+      }
+
+      .mini-box input {
+        padding: 2px 4px;
+      }
+
+      .sign-row .sign-box input[type="text"] {
+        padding: 3px 5px;
+        font-size: 13px;
+      }
+
+      .invoice-shell input[readonly],
+      .invoice-shell .item-total {
+        background: #f1f5f9;
+        border-style: dotted;
+        color: #64748b;
+      }
+    }
+
+    .section-grid-2,
+    .section-grid-3,
+    .section-grid-4 {
+      display: grid;
+      border-bottom: 1px solid #000;
+    }
+
+    .section-grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .section-grid-3 {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .section-grid-4 {
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+
+    .box {
+      border-right: 1px solid #000;
+      min-height: 92px;
+      padding: 6px 8px;
+    }
+
+    .section-grid-2 .box:last-child,
+    .section-grid-3 .box:last-child,
+    .section-grid-4 .box:last-child {
+      border-right: none;
+    }
+
+    .items-wrap textarea.item-description {
+      min-height: 56px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .invoice-shell .items-wrap textarea.item-hs {
+      min-height: 2.5em;
+      max-height: none;
+      font-size: 13px;
+      line-height: 1.35;
+      white-space: pre-wrap;
+      word-break: break-all;
+      overflow-wrap: anywhere;
+    }
+
+    .box.tall {
+      min-height: 120px;
+    }
+
+    .invoice-shell .box.tall textarea {
+      field-sizing: content;
+      min-height: 3.5rem;
+    }
+
+    .label {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      font-family: inherit;
+    }
+
+    textarea {
+      min-height: 70px;
+      resize: none;
+    }
+
+    .items-wrap {
+      border-bottom: 1px solid #000;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      border-right: 1px solid #000;
+      border-bottom: 1px solid #000;
+      padding: 6px;
+      font-size: 13px;
+      vertical-align: top;
+      min-width: 0;
+      overflow: visible;
+    }
+
+    th:last-child,
+    td:last-child {
+      border-right: none;
+    }
+
+    thead th {
+      text-transform: uppercase;
+      font-size: 11px;
+      text-align: left;
+    }
+
+    td input,
+    td textarea {
+      width: 100%;
+      border: none;
+      background: transparent;
+      padding: 0;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+
+    .table-actions {
+      padding: 10px 0;
+    }
+
+    .totals-area {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      border-bottom: 1px solid #000;
+    }
+
+    .totals-note {
+      border-right: 1px solid #000;
+      padding: 8px;
+      min-height: 110px;
+    }
+
+    .totals-declaration-text {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .totals-box {
+      display: grid;
+    }
+
+    .total-row {
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      border-bottom: 1px solid #000;
+      min-height: 38px;
+    }
+
+    .total-row:not(:last-child) {
+      min-height: 0;
+      font-size: 12px;
+    }
+
+    .total-row:not(:last-child) div {
+      padding: 4px 8px;
+    }
+
+    .total-row:not(:last-child) input[type="number"] {
+      font-size: 12px;
+    }
+
+    .total-row:not(:last-child) div:last-child {
+      font-size: 11px;
+    }
+
+    .total-row:last-child {
+      border-bottom: none;
+      font-weight: bold;
+      min-height: 48px;
+      font-size: 15px;
+    }
+
+    .total-row:last-child div {
+      padding: 10px 8px;
+    }
+
+    .total-row:last-child #totalDisplay {
+      font-size: 18px;
+    }
+
+    .total-row div:first-child {
+      border-right: 1px solid #000;
+    }
+
+    .sign-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+    }
+
+    .sign-box {
+      min-height: 64px;
+      border-right: 1px solid #000;
+      padding: 7px 8px;
+    }
+
+    .sign-row .label {
+      font-size: 11px;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .sign-box:last-child {
+      border-right: none;
+    }
+
+    .remove-row-btn {
+      background: #b91c1c;
+      color: white;
+      border: none;
+      padding: 6px 8px;
+      font-size: 12px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm;
+      }
+
+      html, body {
+        background: white;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      .toolbar,
+      .table-actions,
+      .remove-row-btn,
+      .print-tip-banner {
+        display: none !important;
+      }
+
+      /* Remove “actions” column (header X + empty cell) from printed output */
+      thead th.col-actions,
+      tbody td.col-actions {
+        display: none !important;
+      }
+
+      .page {
+        width: auto;
+        margin: 0;
+        border: none;
+        padding: 0;
+      }
+
+      .invoice-shell {
+        border: 2px solid #000;
+      }
+
+      input,
+      textarea {
+        appearance: none;
+        -webkit-appearance: none;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        color: #000 !important;
+        overflow: visible;
+      }
+
+      .invoice-shell textarea {
+        overflow: visible !important;
+        max-height: none !important;
+        page-break-inside: auto;
+        break-inside: auto;
+      }
+
+      .box.tall {
+        overflow: visible;
+        page-break-inside: auto;
+        break-inside: auto;
+      }
+
+      table,
+      thead th,
+      thead tr {
+        page-break-inside: avoid;
+      }
+
+      tbody td {
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+        overflow: visible !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="toolbar">
+      <button type="button" id="saveBtn">Save</button>
+      <button type="button" class="secondary" id="printBtn">Print / Save as PDF</button>
+      <button type="button" class="danger" id="clearBtn">Clear Saved</button>
+    </div>
+
+    <div id="printTipBanner" class="print-tip-banner" role="status">
+      <strong>Printing / PDF:</strong> In your browser's print dialog, turn off
+      <strong>Headers and footers</strong> (varies by browser) so the page URL and date are not added to the margins.
+    </div>
+
+    <div class="invoice-shell">
+      <div class="title-row">
+        <div class="title-left">
+          <h1>Commercial Invoice</h1>
+        </div>
+        <div class="title-right">
+          <div class="mini-grid">
+            <div class="mini-box">
+              <div class="mini-label">Date (yyyy-mm-dd)</div>
+              <input
+                type="text"
+                id="invoiceDate"
+                inputmode="numeric"
+                placeholder="yyyy-mm-dd"
+                maxlength="10"
+                spellcheck="false"
+                title="Format: yyyy-mm-dd"
+                autocomplete="off"
+              />
+            </div>
+            <div class="mini-box">
+              <div class="mini-label">Invoice No.</div>
+              <input type="text" id="invoiceNo" />
+            </div>
+            <div class="mini-box">
+              <div class="mini-label">Customer PO No.</div>
+              <input type="text" id="customerPo" />
+            </div>
+            <div class="mini-box">
+              <div class="mini-label">Currency</div>
+              <input type="text" id="currencyUsed" value="USD" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-grid-2">
+        <div class="box tall">
+          <div class="label">Shipper / Exporter</div>
+          <textarea id="shipper"></textarea>
+        </div>
+        <div class="box tall">
+          <div class="label">Consignee</div>
+          <textarea id="consignee"></textarea>
+        </div>
+      </div>
+
+      <div class="section-grid-2">
+        <div class="box tall">
+          <div class="label">Intermediate Consignee</div>
+          <textarea id="intermediateConsignee"></textarea>
+        </div>
+        <div class="box tall">
+          <div class="label">Notes / Special Instructions</div>
+          <textarea id="notes"></textarea>
+        </div>
+      </div>
+
+      <div class="section-grid-4 section-compact">
+        <div class="box">
+          <div class="label">Country of Export</div>
+          <input type="text" id="countryExport" />
+        </div>
+        <div class="box">
+          <div class="label">Country of Destination</div>
+          <input type="text" id="countryDestination" />
+        </div>
+        <div class="box">
+          <div class="label">B/L / AWB No.</div>
+          <input type="text" id="blAwb" />
+        </div>
+        <div class="box">
+          <div class="label">No. of Packages</div>
+          <input type="number" id="packages" min="0" />
+        </div>
+      </div>
+
+      <div class="section-grid-3 section-compact">
+        <div class="box">
+          <div class="label">Terms of Payment</div>
+          <input type="text" id="termsPayment" />
+        </div>
+        <div class="box">
+          <div class="label">Export Route / Carrier</div>
+          <input type="text" id="routeCarrier" />
+        </div>
+        <div class="box">
+          <div class="label">Additional Reference</div>
+          <input type="text" id="extraRef" />
+        </div>
+      </div>
+
+      <div class="items-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 39%;">Marks / Description /<br />Country of Manufacture</th>
+              <th style="width: 12%;">HS No.</th>
+              <th style="width: 7%;">Qty</th>
+              <th style="width: 11%;">Weight</th>
+              <th style="width: 12%;">Unit Value</th>
+              <th style="width: 14%;">Total</th>
+              <th class="col-actions" style="width: 5%;" scope="col" aria-label="Remove row">X</th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody"></tbody>
+        </table>
+      </div>
+
+      <div class="table-actions">
+        <button type="button" class="secondary" id="addRowBtn">Add Item Row</button>
+      </div>
+
+      <div class="totals-area">
+        <div class="totals-note">
+          <div class="label">Declaration</div>
+          <p class="totals-declaration-text">
+            I declare that the information contained in this invoice is true and correct and that the contents of this shipment are as stated above.
+          </p>
+        </div>
+        <div class="totals-box">
+          <div class="total-row">
+            <div>Sub Total</div>
+            <div id="subTotalDisplay">0.00</div>
+          </div>
+          <div class="total-row">
+            <div>Freight</div>
+            <div><input type="number" id="freight" min="0" step="0.01" value="0" /></div>
+          </div>
+          <div class="total-row">
+            <div>Insurance</div>
+            <div><input type="number" id="insurance" min="0" step="0.01" value="0" /></div>
+          </div>
+          <div class="total-row">
+            <div>Total Invoice Value</div>
+            <div id="totalDisplay">0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sign-row">
+        <div class="sign-box">
+          <div class="label">Shipper / Authorized Signature</div>
+        </div>
+        <div class="sign-box">
+          <div class="label">Title</div>
+          <input type="text" id="signTitle" />
+        </div>
+        <div class="sign-box">
+          <div class="label">Date (yyyy-mm-dd)</div>
+          <input
+            type="text"
+            id="signDate"
+            inputmode="numeric"
+            placeholder="yyyy-mm-dd"
+            maxlength="10"
+            spellcheck="false"
+            title="Format: yyyy-mm-dd"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "commercial_invoice_boxed_v3";
+    const STORAGE_KEY_LEGACY = "commercial_invoice_boxed_v2";
+
+    const fields = [
+      "invoiceDate",
+      "invoiceNo",
+      "customerPo",
+      "currencyUsed",
+      "shipper",
+      "consignee",
+      "intermediateConsignee",
+      "notes",
+      "countryExport",
+      "countryDestination",
+      "blAwb",
+      "packages",
+      "termsPayment",
+      "routeCarrier",
+      "extraRef",
+      "freight",
+      "insurance",
+      "signTitle",
+      "signDate"
+    ];
+
+    const itemsBody = document.getElementById("itemsBody");
+    const addRowBtn = document.getElementById("addRowBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const printBtn = document.getElementById("printBtn");
+    const printTipBanner = document.getElementById("printTipBanner");
+    const clearBtn = document.getElementById("clearBtn");
+    const subTotalDisplay = document.getElementById("subTotalDisplay");
+    const totalDisplay = document.getElementById("totalDisplay");
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function mergeItemDescriptionForDisplay(item) {
+      const d = (item.description || "").trim();
+      const m = (item.countryOfManufacture || "").trim();
+      if (d && m) return `${d}\n\n${m}`;
+      if (d) return d;
+      if (m) return m;
+      return "";
+    }
+
+    function createRow(item = {}) {
+      const tr = document.createElement("tr");
+      const descValue = escapeHtml(mergeItemDescriptionForDisplay(item));
+      tr.innerHTML = `
+        <td>
+          <textarea class="item-description" rows="3" spellcheck="false" placeholder="Marks, description, and country of manufacture">${descValue}</textarea>
+        </td>
+        <td><textarea class="item-hs" rows="2" spellcheck="false" wrap="soft">${escapeHtml(item.hs || "")}</textarea></td>
+        <td><input type="number" class="item-qty" min="0" step="1" value="${item.qty ?? 1}"></td>
+        <td><input type="number" class="item-weight" min="0" step="0.01" value="${item.weight ?? 0}"></td>
+        <td><input type="number" class="item-unit-value" min="0" step="0.01" value="${item.unitValue ?? 0}"></td>
+        <td><input type="number" class="item-total" value="0" readonly></td>
+        <td class="col-actions"><button type="button" class="remove-row-btn">X</button></td>
+      `;
+
+      itemsBody.appendChild(tr);
+
+      tr.querySelectorAll(".item-qty, .item-unit-value").forEach(el => {
+        el.addEventListener("input", () => {
+          updateRow(tr);
+          updateTotals();
+        });
+      });
+
+      tr.querySelector(".remove-row-btn").addEventListener("click", () => {
+        tr.remove();
+        updateTotals();
+      });
+
+      updateRow(tr);
+    }
+
+    function updateRow(tr) {
+      const qty = parseFloat(tr.querySelector(".item-qty").value) || 0;
+      const unitValue = parseFloat(tr.querySelector(".item-unit-value").value) || 0;
+      tr.querySelector(".item-total").value = (qty * unitValue).toFixed(2);
+    }
+
+    function updateTotals() {
+      let subtotal = 0;
+      document.querySelectorAll(".item-total").forEach(input => {
+        subtotal += parseFloat(input.value) || 0;
+      });
+
+      const freight = parseFloat(document.getElementById("freight").value) || 0;
+      const insurance = parseFloat(document.getElementById("insurance").value) || 0;
+      const total = subtotal + freight + insurance;
+
+      subTotalDisplay.textContent = subtotal.toFixed(2);
+      totalDisplay.textContent = total.toFixed(2);
+    }
+
+    function getFormData() {
+      const data = {};
+      fields.forEach(id => {
+        data[id] = document.getElementById(id).value;
+      });
+
+      data.items = Array.from(document.querySelectorAll("#itemsBody tr")).map(tr => ({
+        description: tr.querySelector(".item-description").value,
+        hs: tr.querySelector(".item-hs").value,
+        qty: tr.querySelector(".item-qty").value,
+        weight: tr.querySelector(".item-weight").value,
+        unitValue: tr.querySelector(".item-unit-value").value
+      }));
+
+      return data;
+    }
+
+    function setFormData(data) {
+      if (data.countryDestination === undefined && data.finalDestination !== undefined) {
+        data.countryDestination = data.finalDestination;
+      }
+
+      fields.forEach(id => {
+        if (data[id] !== undefined) {
+          document.getElementById(id).value = data[id];
+        }
+      });
+
+      itemsBody.innerHTML = "";
+
+      if (data.items && data.items.length) {
+        data.items.forEach(item => createRow(item));
+      } else {
+        createRow();
+      }
+
+      updateTotals();
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(getFormData()));
+      localStorage.removeItem(STORAGE_KEY_LEGACY);
+      alert("Invoice saved.");
+    }
+
+    function loadData() {
+      const raw =
+        localStorage.getItem(STORAGE_KEY) || localStorage.getItem(STORAGE_KEY_LEGACY);
+      if (!raw) {
+        createRow();
+        updateTotals();
+        return;
+      }
+
+      try {
+        setFormData(JSON.parse(raw));
+      } catch (e) {
+        createRow();
+        updateTotals();
+      }
+    }
+
+    addRowBtn.addEventListener("click", () => {
+      createRow();
+      updateTotals();
+    });
+
+    saveBtn.addEventListener("click", saveData);
+
+    printBtn.addEventListener("click", () => {
+      printTipBanner.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      window.print();
+    });
+    clearBtn.addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_KEY_LEGACY);
+      location.reload();
+    });
+
+    document.getElementById("freight").addEventListener("input", updateTotals);
+    document.getElementById("insurance").addEventListener("input", updateTotals);
+
+    function expandInvoiceTextareasForPrint() {
+      document.querySelectorAll(".invoice-shell textarea").forEach(ta => {
+        ta.dataset.printPrevHeight = ta.style.height || "";
+        ta.style.height = "auto";
+        ta.style.height = `${Math.max(ta.scrollHeight + 4, 40)}px`;
+      });
+    }
+
+    function restoreInvoiceTextareasAfterPrint() {
+      document.querySelectorAll(".invoice-shell textarea").forEach(ta => {
+        ta.style.height = ta.dataset.printPrevHeight || "";
+        delete ta.dataset.printPrevHeight;
+      });
+    }
+
+    window.addEventListener("beforeprint", expandInvoiceTextareasForPrint);
+    window.addEventListener("afterprint", restoreInvoiceTextareasAfterPrint);
+
+    loadData();
+  </script>
+</body>
+</html>
