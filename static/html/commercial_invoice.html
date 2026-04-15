@@ -199,6 +199,46 @@
       background: transparent;
     }
 
+    .mini-box .date-field-wrap > input[type="text"],
+    .sign-box .date-field-wrap > input[type="text"] {
+      width: auto;
+    }
+
+    .date-field-wrap {
+      display: flex;
+      align-items: stretch;
+      gap: 4px;
+      width: 100%;
+    }
+
+    .date-field-wrap > input[type="text"] {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .date-picker-proxy {
+      position: fixed;
+      left: -9999px;
+      top: 0;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+    }
+
+    .date-picker-btn {
+      flex: 0 0 auto;
+      padding: 2px 8px;
+      font-size: 12px;
+      line-height: 1.2;
+      align-self: center;
+      background: #64748b;
+      white-space: nowrap;
+    }
+
+    .date-picker-btn:hover {
+      background: #475569;
+    }
+
     /* Shorter rows: shipment detail fields */
     .section-compact .box {
       min-height: 0;
@@ -523,6 +563,11 @@
         overflow: visible;
       }
 
+      .date-picker-proxy,
+      .date-picker-btn {
+        display: none !important;
+      }
+
       .invoice-shell textarea {
         overflow: visible !important;
         max-height: none !important;
@@ -713,16 +758,28 @@
         </div>
         <div class="sign-box">
           <div class="label">Date (yyyy-mm-dd)</div>
-          <input
-            type="text"
-            id="signDate"
-            inputmode="numeric"
-            placeholder="yyyy-mm-dd"
-            maxlength="10"
-            spellcheck="false"
-            title="Format: yyyy-mm-dd"
-            autocomplete="off"
-          />
+          <div class="date-field-wrap">
+            <input
+              type="text"
+              id="signDate"
+              inputmode="numeric"
+              placeholder="yyyy-mm-dd"
+              maxlength="10"
+              spellcheck="false"
+              title="yyyy-mm-dd, or use Calendar"
+              autocomplete="off"
+            />
+            <input
+              type="date"
+              id="signDatePicker"
+              class="date-picker-proxy"
+              tabindex="-1"
+              aria-hidden="true"
+            />
+            <button type="button" class="date-picker-btn" id="signDateCalBtn" title="Open calendar" aria-label="Open calendar for signature date">
+              Cal
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -769,6 +826,60 @@
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;");
+    }
+
+    /** Coerce saved text into yyyy-mm-dd; invalid values become "". */
+    function normalizeIsoDate(value) {
+      if (value === undefined || value === null) return "";
+      const t = String(value).trim();
+      if (!t) return "";
+      const m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (!m) return "";
+      const y = Number(m[1]);
+      const mo = Number(m[2]);
+      const d = Number(m[3]);
+      if (mo < 1 || mo > 12 || d < 1 || d > 31) return "";
+      const dt = new Date(Date.UTC(y, mo - 1, d));
+      if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return "";
+      return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    }
+
+    function wireIsoDateWithPicker(textId, pickerId, buttonId) {
+      const text = document.getElementById(textId);
+      const picker = document.getElementById(pickerId);
+      const btn = document.getElementById(buttonId);
+
+      function openPicker() {
+        const n = normalizeIsoDate(text.value);
+        picker.value = n || "";
+        if (typeof picker.showPicker === "function") {
+          try {
+            picker.showPicker();
+            return;
+          } catch (_) {
+            /* fall through */
+          }
+        }
+        picker.focus({ preventScroll: true });
+        picker.click();
+      }
+
+      picker.addEventListener("change", () => {
+        if (picker.value) {
+          text.value = picker.value;
+        }
+      });
+
+      btn.addEventListener("click", () => {
+        openPicker();
+      });
+
+      text.addEventListener("blur", () => {
+        const n = normalizeIsoDate(text.value);
+        if (n) {
+          text.value = n;
+        }
+      });
     }
 
     function mergeItemDescriptionForDisplay(item) {
@@ -856,7 +967,12 @@
 
       fields.forEach(id => {
         if (data[id] !== undefined) {
-          document.getElementById(id).value = data[id];
+          const el = document.getElementById(id);
+          if (id === "invoiceDate" || id === "signDate") {
+            el.value = normalizeIsoDate(data[id]);
+          } else {
+            el.value = data[id];
+          }
         }
       });
 
@@ -931,6 +1047,9 @@
 
     window.addEventListener("beforeprint", expandInvoiceTextareasForPrint);
     window.addEventListener("afterprint", restoreInvoiceTextareasAfterPrint);
+
+    wireIsoDateWithPicker("invoiceDate", "invoiceDatePicker", "invoiceDateCalBtn");
+    wireIsoDateWithPicker("signDate", "signDatePicker", "signDateCalBtn");
 
     loadData();
   </script>
