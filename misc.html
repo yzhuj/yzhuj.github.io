@@ -80,8 +80,19 @@
     </div>
     <hr class="divider-line">
     <div style="margin-bottom: 10px;">
-      <label style="display: inline-block; width: var(--calc-label-width);">Power [W]:</label>
+      <label style="display: inline-block; width: var(--calc-label-width);">Power:</label>
       <input type="number" id="calc1-power" step="any" style="width: 150px;" oninput="calc1()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Input power unit:</label>
+      <input type="radio" id="calc1-power-in-nw" name="calc1-power-input-unit" value="nW" onchange="calc1()">
+      <label for="calc1-power-in-nw" style="margin-right: 12px;">nW</label>
+      <input type="radio" id="calc1-power-in-uw" name="calc1-power-input-unit" value="uW" onchange="calc1()">
+      <label for="calc1-power-in-uw" style="margin-right: 12px;">&mu;W</label>
+      <input type="radio" id="calc1-power-in-mw" name="calc1-power-input-unit" value="mW" onchange="calc1()">
+      <label for="calc1-power-in-mw" style="margin-right: 12px;">mW</label>
+      <input type="radio" id="calc1-power-in-w" name="calc1-power-input-unit" value="W" checked onchange="calc1()">
+      <label for="calc1-power-in-w">W</label>
     </div>
     <div style="margin-bottom: 10px;">
       <label style="display: inline-block; width: var(--calc-label-width);">Beam waist (1/e²) [mm]:</label>
@@ -89,12 +100,12 @@
     </div>
     <hr class="divider-line">
     <div style="margin-bottom: 10px;">
-      <input type="radio" id="calc1-power-mw" name="calc1-power-unit" value="mW" onchange="calc1()">
-      <label for="calc1-power-mw" style="margin-right: 15px;">mW</label>
-      <input type="radio" id="calc1-power-w" name="calc1-power-unit" value="W" checked onchange="calc1()">
-      <label for="calc1-power-w" style="margin-right: 15px;">W</label>
-      <input type="radio" id="calc1-power-kw" name="calc1-power-unit" value="kW" onchange="calc1()">
-      <label for="calc1-power-kw">kW</label>
+      <input type="radio" id="calc1-power-out-mw" name="calc1-power-output-unit" value="mW" onchange="calc1()">
+      <label for="calc1-power-out-mw" style="margin-right: 12px;">mW</label>
+      <input type="radio" id="calc1-power-out-w" name="calc1-power-output-unit" value="W" checked onchange="calc1()">
+      <label for="calc1-power-out-w" style="margin-right: 12px;">W</label>
+      <input type="radio" id="calc1-power-out-kw" name="calc1-power-output-unit" value="kW" onchange="calc1()">
+      <label for="calc1-power-out-kw">kW</label>
     </div>
     <div style="margin-bottom: 10px;">
       <input type="radio" id="calc1-area-mm2" name="calc1-area-unit" value="mm^2" onchange="calc1()">
