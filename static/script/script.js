@@ -199,4 +199,50 @@ function calc6() {
 	f = Math.PI * D * MFD / (4 * wavelength)
 	document.getElementById("calc6-result1").textContent = Number((f*1e3).toPrecision(3));
 }
+
+function calc8() {
+	let waist = parseFloat(document.getElementById("calc8-w0").value);
+	const P = parseFloat(document.getElementById("calc8-P").value);
+	const alpha = parseFloat(document.getElementById("calc8-alpha").value);
+	let wavelength = parseFloat(document.getElementById("calc8-wavelength").value);
+	let mass = parseFloat(document.getElementById("calc8-mass").value);
+
+	if (isBad(waist) || isBad(P) || isBad(alpha) || waist <= 0 || P < 0) {
+		document.getElementById("calc8-result1").textContent = "—";
+		document.getElementById("calc8-result2").textContent = "—";
+		document.getElementById("calc8-result3").textContent = "—";
+		return;
+	}
+
+	const depth_uK = 0.143205403 * alpha * P / waist**2;
+	document.getElementById("calc8-result1").textContent =
+		Number(depth_uK.toPrecision(3));
+
+	if (isBad(wavelength) || isBad(mass) || wavelength <= 0 || mass <= 0) {
+		document.getElementById("calc8-result2").textContent = "—";
+		document.getElementById("calc8-result3").textContent = "—";
+		return;
+	}
+
+	waist = waist * 1e-6;
+	wavelength = wavelength * 1e-9;
+	mass = mass * 1.66053906660e-27;
+
+	const kB = 1.380649e-23;
+	const depth_J = Math.abs(depth_uK) * 1e-6 * kB;
+	const rayleigh = Math.PI * waist**2 / wavelength;
+
+	const radial_Hz =
+		Math.sqrt(4 * depth_J / (mass * waist**2)) / (2 * Math.PI);
+
+	const axial_Hz =
+		Math.sqrt(2 * depth_J / (mass * rayleigh**2)) / (2 * Math.PI);
+
+	document.getElementById("calc8-result2").textContent =
+		Number((radial_Hz / 1e6).toPrecision(3));
+
+	document.getElementById("calc8-result3").textContent =
+		Number((axial_Hz / 1e6).toPrecision(3));
+}
+
   

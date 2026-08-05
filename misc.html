@@ -277,6 +277,48 @@
     </div>
   </div>
 
+  <li class="magic" onclick="appdisapp('calc8-form', true)">Tweezer Trap Depth</li>
+  <div id="calc8-form" style="display:none; margin-left: 20px; margin-top: 10px; margin-bottom: 20px;">
+    <div style="margin-bottom: 10px;">
+      This script computes the trap depth and harmonic trap frequencies of a circular Gaussian optical tweezer.
+    </div>
+    <hr class="divider-line">
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Tweezer waist [&mu;m]:</label>
+      <input type="number" id="calc8-w0" step="any" style="width: 150px;" oninput="calc8()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Power [mW]:</label>
+      <input type="number" id="calc8-P" step="any" style="width: 150px;" oninput="calc8()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Polarizability [a.u.]:</label>
+      <input type="number" id="calc8-alpha" step="any" style="width: 150px;" oninput="calc8()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Wavelength [nm]:</label>
+      <input type="number" id="calc8-wavelength" step="any" style="width: 150px;" oninput="calc8()">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Atomic mass [amu]:</label>
+      <input type="number" id="calc8-mass" step="any" value="" style="width: 150px;" oninput="calc8()">
+    </div>
+    <hr class="divider-line">
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">U/k<sub>B</sub> [&mu;K]:</label>
+      <span id="calc8-result1">—</span>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Radial frequency [MHz]:</label>
+      <span id="calc8-result2">—</span>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="display: inline-block; width: var(--calc-label-width);">Axial frequency [MHz]:</label>
+      <span id="calc8-result3">—</span>
+    </div>
+  </div>
+
+
   <!-- ## finesse given R1, R2
   ## mode size
   ## why PDH lock in reflection
