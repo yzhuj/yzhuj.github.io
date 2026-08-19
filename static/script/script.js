@@ -209,14 +209,20 @@ function calc8() {
 
 	if (isBad(waist) || isBad(P) || isBad(alpha) || waist <= 0 || P < 0) {
 		document.getElementById("calc8-result1").textContent = "—";
+		document.getElementById("calc8-result-uh").textContent = "—";
 		document.getElementById("calc8-result2").textContent = "—";
 		document.getElementById("calc8-result3").textContent = "—";
 		return;
 	}
 
 	const depth_uK = 0.143205403 * alpha * P / waist**2;
+	const kB = 1.380649e-23;
+	const h = 6.62607015e-34;
+	const depth_MHz = depth_uK * 1e-6 * kB / h / 1e6;
 	document.getElementById("calc8-result1").textContent =
 		Number(depth_uK.toPrecision(3));
+	document.getElementById("calc8-result-uh").textContent =
+		Number(depth_MHz.toPrecision(4));
 
 	if (isBad(wavelength) || isBad(mass) || wavelength <= 0 || mass <= 0) {
 		document.getElementById("calc8-result2").textContent = "—";
@@ -228,7 +234,6 @@ function calc8() {
 	wavelength = wavelength * 1e-9;
 	mass = mass * 1.66053906660e-27;
 
-	const kB = 1.380649e-23;
 	const depth_J = Math.abs(depth_uK) * 1e-6 * kB;
 	const rayleigh = Math.PI * waist**2 / wavelength;
 
