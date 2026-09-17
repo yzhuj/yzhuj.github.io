@@ -242,6 +242,7 @@
               </div>
             </div>
             <select id="time" class="sr-only" tabindex="-1" aria-hidden="true">
+              <option value="0.0001">100 µs</option>
               <option value="0.001" selected>1 ms</option>
               <option value="0.01">10 ms</option>
               <option value="0.1">100 ms</option>
@@ -286,6 +287,8 @@
               <option value="falling">Falling</option>
             </select>
           </div>
+
+          <button id="single" type="button">Single</button>
         </div>
 
         <div id="spectrum-controls" class="display-contents panel-hidden">
@@ -329,7 +332,6 @@
         </div>
 
         <button id="pause" type="button">Pause</button>
-        <button id="reset" type="button">Reset</button>
       </div>
 
       <div class="readouts" id="readouts-scope">
@@ -385,12 +387,14 @@
     const CAPTURE_SIZE = 2048;
     const RING_SECONDS = 12;
     const DEFAULT_SAMPLE_RATE = 48000;
-    const GENERATOR_AMPLITUDE = 0.7;
+    // Peak sample = Vpp/2 / full-scale, so Peak-to-peak reads 2.00 V.
+    const GENERATOR_VPP = 2;
     const GENERATOR_FREQUENCY = 1000;
 
     // --- State ---------------------------------------------------------------
     let viewMode = "scope"; // "scope" | "spectrum"
     let paused = false;
+    let singleShotArmed = false;
     let audioCtx = null;
     let outputNode = null;
     let captureNode = null;
@@ -851,7 +855,7 @@
 
     // --- Signal generation / capture -----------------------------------------
     function sampleWaveform(phaseRadians) {
-      const amp = GENERATOR_AMPLITUDE;
+      const amp = GENERATOR_VPP / 2 / fullScaleVolts();
       if (settings.wave === "square") {
         return amp * (Math.sin(phaseRadians) >= 0 ? 1 : -1);
       }
@@ -1076,15 +1080,25 @@
 
         if (!samples) {
           clearScopeReadouts();
-          drawOverlayLabel("Untriggered");
+          drawOverlayLabel(singleShotArmed ? "Armed" : "Untriggered");
           return;
         }
+
         frozenSamples = samples;
+
+        // Single-shot: hold the first successful trigger and stop acquiring.
+        if (singleShotArmed) {
+          singleShotArmed = false;
+          paused = true;
+          $("pause").textContent = "Resume";
+          $("pause").classList.add("active");
+          updateSingleButton();
+        }
       } else {
         samples = frozenSamples;
         if (!samples) {
-          if (settings.triggerMode !== "none") {
-            drawOverlayLabel("Untriggered");
+          if (settings.triggerMode !== "none" || singleShotArmed) {
+            drawOverlayLabel(singleShotArmed ? "Armed" : "Untriggered");
           }
           return;
         }
@@ -1126,23 +1140,37 @@
     }
 
     // --- Actions / wiring ----------------------------------------------------
+    function updateSingleButton() {
+      const btn = $("single");
+      btn.classList.toggle("active", singleShotArmed);
+      btn.textContent = singleShotArmed ? "Armed" : "Single";
+    }
+
+    function armSingleShot() {
+      readSettings();
+      // Single-shot needs an edge; default to rising if currently free-running.
+      if (settings.triggerMode === "none") {
+        $("triggerMode").value = "rising";
+        settings.triggerMode = "rising";
+      }
+
+      paused = false;
+      $("pause").textContent = "Pause";
+      $("pause").classList.remove("active");
+      frozenSamples = null;
+      singleShotArmed = true;
+      updateSingleButton();
+    }
+
     function togglePause() {
       paused = !paused;
       $("pause").textContent = paused ? "Resume" : "Pause";
       $("pause").classList.toggle("active", paused);
-    }
-
-    function resetControls() {
-      phase = 0;
-      settings.triggerVolts = 0;
-      $("triggerMode").value = "none";
-      timeStepper.setValue("0.001");
-      voltsStepper.setValue("0.5");
-      $("span").value = 10000;
-      $("dbDiv").value = 10;
-      $("refLevel").value = 0;
-      $("fftSize").value = 2048;
-      clampTriggerLevel();
+      if (!paused) {
+        // Resuming cancels an armed single-shot wait.
+        singleShotArmed = false;
+        updateSingleButton();
+      }
     }
 
     const timeStepper = createStepper({
@@ -1160,11 +1188,11 @@
 
     $("triggerDown").onclick = () => bumpTriggerLevel(-1);
     $("triggerUp").onclick = () => bumpTriggerLevel(1);
+    $("single").onclick = armSingleShot;
     $("tab-scope").onclick = () => setViewMode("scope");
     $("tab-spectrum").onclick = () => setViewMode("spectrum");
     $("input").onchange = setupAudio;
     $("pause").onclick = togglePause;
-    $("reset").onclick = resetControls;
 
     document.addEventListener("keydown", (event) => {
       if (event.code === "Space" && event.target.tagName !== "INPUT") {
