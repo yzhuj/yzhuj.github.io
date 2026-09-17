@@ -1,0 +1,1192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Web Oscilloscope</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101419;
+      --panel: #171d24;
+      --line: #2a3540;
+      --text: #e8eef2;
+      --muted: #91a0ac;
+      --green: #71f4a5;
+      --orange: #ffbd6b;
+      --canvas-bg: #080d0c;
+      --grid: #173c2c;
+      --grid-axis: #1a4534;
+      --trace: #70f5a4;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% -20%, #25313d, var(--bg) 55%);
+      color: var(--text);
+      font: 14px/1.4 system-ui, -apple-system, Segoe UI, sans-serif;
+    }
+
+    .wrap {
+      width: min(1180px, 100%);
+      margin: auto;
+      padding: 24px;
+    }
+
+    .tabs {
+      display: flex;
+      border: 1px solid var(--line);
+      border-bottom: none;
+      border-radius: 12px 12px 0 0;
+      overflow: hidden;
+      background: var(--panel);
+    }
+
+    .tab {
+      flex: 1;
+      border: none;
+      border-radius: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+      padding: 12px 16px;
+      font: 600 12px/1.4 inherit;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .tab:last-child { border-right: none; }
+    .tab:hover { color: var(--text); }
+    .tab.active {
+      color: var(--green);
+      background: #090d10;
+    }
+
+    .scope {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 0 0 12px 12px;
+      background: #090d10;
+      box-shadow: 0 14px 42px #0006;
+    }
+
+    .source-bar {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #0c1216;
+    }
+
+    #sourceLabel {
+      color: var(--green);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 8;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      padding: 14px;
+      border-top: 1px solid var(--line);
+      background: var(--panel);
+      align-items: end;
+    }
+
+    .control {
+      display: grid;
+      gap: 4px;
+      min-width: 105px;
+    }
+
+    .stepper-control { min-width: 108px; }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stepper-btns {
+      display: flex;
+      gap: 2px;
+    }
+
+    .stepper-btn {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border-radius: 6px;
+      font-size: 16px;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+
+    .stepper-value {
+      min-width: 3.6em;
+      text-align: left;
+      color: var(--green);
+      font: 600 13px ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .panel-hidden { display: none !important; }
+    .display-contents { display: contents; }
+
+    label,
+    .readout-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    select,
+    button {
+      color: var(--text);
+      background: #222b34;
+      border: 1px solid #3b4955;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font: inherit;
+      accent-color: var(--green);
+    }
+
+    button { cursor: pointer; }
+    button:hover { border-color: var(--green); }
+    button.active {
+      color: #111;
+      background: var(--orange);
+      border-color: var(--orange);
+    }
+
+    .readouts {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 1px;
+      border-top: 1px solid var(--line);
+      background: var(--line);
+    }
+
+    .readout {
+      padding: 12px 14px;
+      background: var(--panel);
+    }
+
+    .readout-value {
+      margin-top: 3px;
+      color: var(--green);
+      font: 600 18px ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    @media (max-width: 700px) {
+      .wrap { padding: 13px; }
+      .readouts { grid-template-columns: repeat(2, 1fr); }
+      canvas { aspect-ratio: 1.25; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab active" id="tab-scope" role="tab" aria-selected="true">Oscilloscope</button>
+      <button type="button" class="tab" id="tab-spectrum" role="tab" aria-selected="false">Spectrum Analyzer</button>
+    </div>
+
+    <section class="scope">
+      <div class="source-bar">
+        <span id="sourceLabel">Test Generator</span>
+      </div>
+
+      <canvas id="scope" width="1200" height="600"></canvas>
+
+      <div class="toolbar">
+        <div class="control">
+          <label for="input">Input</label>
+          <select id="input">
+            <option value="sine">1 kHz sine wave</option>
+            <option value="square">1 kHz square wave</option>
+            <option value="microphone">Microphone</option>
+          </select>
+        </div>
+
+        <div id="scope-controls" class="display-contents">
+          <div class="control stepper-control">
+            <label>Time / div</label>
+            <div class="stepper">
+              <output class="stepper-value" id="timeValue">1 ms</output>
+              <div class="stepper-btns">
+                <button type="button" class="stepper-btn" id="timeDown" aria-label="Decrease time per division">−</button>
+                <button type="button" class="stepper-btn" id="timeUp" aria-label="Increase time per division">+</button>
+              </div>
+            </div>
+            <select id="time" class="sr-only" tabindex="-1" aria-hidden="true">
+              <option value="0.001" selected>1 ms</option>
+              <option value="0.01">10 ms</option>
+              <option value="0.1">100 ms</option>
+              <option value="1">1 s</option>
+            </select>
+          </div>
+
+          <div class="control stepper-control">
+            <label>Volts / div</label>
+            <div class="stepper">
+              <output class="stepper-value" id="voltsValue">0.5 V</output>
+              <div class="stepper-btns">
+                <button type="button" class="stepper-btn" id="voltsDown" aria-label="Decrease volts per division">−</button>
+                <button type="button" class="stepper-btn" id="voltsUp" aria-label="Increase volts per division">+</button>
+              </div>
+            </div>
+            <select id="volts" class="sr-only" tabindex="-1" aria-hidden="true">
+              <option value="0.1">0.1 V</option>
+              <option value="0.25">0.25 V</option>
+              <option value="0.5" selected>0.5 V</option>
+              <option value="1">1 V</option>
+              <option value="2">2 V</option>
+            </select>
+          </div>
+
+          <div class="control stepper-control">
+            <label>Trigger Level</label>
+            <div class="stepper">
+              <output class="stepper-value" id="triggerValue">0.0 V</output>
+              <div class="stepper-btns">
+                <button type="button" class="stepper-btn" id="triggerDown" aria-label="Decrease trigger level">−</button>
+                <button type="button" class="stepper-btn" id="triggerUp" aria-label="Increase trigger level">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="control">
+            <label for="triggerMode">Trigger</label>
+            <select id="triggerMode">
+              <option value="none" selected>Untriggered</option>
+              <option value="rising">Rising</option>
+              <option value="falling">Falling</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="spectrum-controls" class="display-contents panel-hidden">
+          <div class="control">
+            <label for="fftSize">FFT size</label>
+            <select id="fftSize">
+              <option value="512">512</option>
+              <option value="1024">1024</option>
+              <option value="2048" selected>2048</option>
+              <option value="4096">4096</option>
+              <option value="8192">8192</option>
+              <option value="16384">16384</option>
+            </select>
+          </div>
+          <div class="control">
+            <label for="span">Freq span</label>
+            <select id="span">
+              <option value="1000">1 kHz</option>
+              <option value="5000">5 kHz</option>
+              <option value="10000" selected>10 kHz</option>
+              <option value="20000">20 kHz</option>
+            </select>
+          </div>
+          <div class="control">
+            <label for="dbDiv">dB / div</label>
+            <select id="dbDiv">
+              <option value="5">5 dB</option>
+              <option value="10" selected>10 dB</option>
+              <option value="20">20 dB</option>
+            </select>
+          </div>
+          <div class="control">
+            <label for="refLevel">Ref level</label>
+            <select id="refLevel">
+              <option value="0" selected>0 dBFS</option>
+              <option value="-10">−10 dBFS</option>
+              <option value="-20">−20 dBFS</option>
+              <option value="-40">−40 dBFS</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="pause" type="button">Pause</button>
+        <button id="reset" type="button">Reset</button>
+      </div>
+
+      <div class="readouts" id="readouts-scope">
+        <div class="readout">
+          <div class="readout-label">Frequency</div>
+          <div class="readout-value" id="measureFrequency">—</div>
+        </div>
+        <div class="readout">
+          <div class="readout-label">Peak-to-peak</div>
+          <div class="readout-value" id="measureVpp">—</div>
+        </div>
+        <div class="readout">
+          <div class="readout-label">RMS</div>
+          <div class="readout-value" id="measureRms">—</div>
+        </div>
+        <div class="readout">
+          <div class="readout-label">Sample rate</div>
+          <div class="readout-value" id="measureRate">—</div>
+        </div>
+      </div>
+
+      <div class="readouts panel-hidden" id="readouts-spectrum">
+        <div class="readout">
+          <div class="readout-label">Peak frequency</div>
+          <div class="readout-value" id="measurePeakFreq">—</div>
+        </div>
+        <div class="readout">
+          <div class="readout-label">Peak level</div>
+          <div class="readout-value" id="measurePeakDb">—</div>
+        </div>
+        <div class="readout">
+          <div class="readout-label">FFT size</div>
+          <div class="readout-value" id="measureFftSize">—</div>
+        </div>
+        <div class="readout">
+          <div class="readout-label">Sample rate</div>
+          <div class="readout-value" id="measureSpecRate">—</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.querySelector("#scope");
+    const ctx = canvas.getContext("2d");
+    const $ = (id) => document.getElementById(id);
+
+    // --- Constants -----------------------------------------------------------
+    const H_DIVS = 10;
+    const V_DIVS = 8;
+    // Vertical mapping uses volts/div × 4 (center to top of the graticule).
+    const VERTICAL_FULL_SCALE_DIVS = 4;
+    const CAPTURE_SIZE = 2048;
+    const RING_SECONDS = 12;
+    const DEFAULT_SAMPLE_RATE = 48000;
+    const GENERATOR_AMPLITUDE = 0.7;
+    const GENERATOR_FREQUENCY = 1000;
+
+    // --- State ---------------------------------------------------------------
+    let viewMode = "scope"; // "scope" | "spectrum"
+    let paused = false;
+    let audioCtx = null;
+    let outputNode = null;
+    let captureNode = null;
+    let captureMute = null;
+    let stream = null;
+    let lastFrameTime = 0;
+    let phase = 0;
+    let frozenSamples = null;
+    let frozenSpectrum = null;
+    let audioInputGeneration = 0;
+    let ringBuffer = null;
+    let ringWrite = 0;
+    let ringFilled = 0;
+
+    const settings = {
+      timePerDiv: 0.001,
+      voltsPerDiv: 0.5,
+      triggerVolts: 0,
+      triggerMode: "none",
+      wave: "sine",
+      freqSpan: 10000,
+      dbPerDiv: 10,
+      refLevelDb: 0,
+      fftSize: 2048,
+    };
+
+    // --- Helpers -------------------------------------------------------------
+    function formatHz(hz) {
+      if (hz >= 1000) {
+        return (hz / 1000).toFixed(hz >= 10000 ? 1 : 2) + " kHz";
+      }
+      return hz.toFixed(1) + " Hz";
+    }
+
+    function formatTriggerVolts(volts) {
+      return (Math.round(volts * 10) / 10).toFixed(1) + " V";
+    }
+
+    function fullScaleVolts() {
+      return settings.voltsPerDiv * VERTICAL_FULL_SCALE_DIVS;
+    }
+
+    function getSampleRate() {
+      return audioCtx ? audioCtx.sampleRate : DEFAULT_SAMPLE_RATE;
+    }
+
+    function isGeneratorMode() {
+      return $("input").value !== "microphone";
+    }
+
+    function syncGeneratorSettings() {
+      const mode = $("input").value;
+      if (mode === "sine" || mode === "square") {
+        settings.wave = mode;
+      }
+    }
+
+    function setSourceLabel(text) {
+      $("sourceLabel").textContent = text;
+    }
+
+    function sampleToY(sample, height) {
+      const scale = fullScaleVolts();
+      return height / 2 - (sample / scale) * height * VERTICAL_FULL_SCALE_DIVS;
+    }
+
+    function voltsToY(volts, height) {
+      return sampleToY(volts / fullScaleVolts(), height);
+    }
+
+    function windowSampleCount() {
+      return Math.max(2, Math.round(settings.timePerDiv * H_DIVS * getSampleRate()));
+    }
+
+    function clearScopeReadouts() {
+      $("measureFrequency").textContent = "—";
+      $("measureVpp").textContent = "—";
+      $("measureRms").textContent = "—";
+      $("measureRate").textContent = audioCtx
+        ? Math.round(getSampleRate() / 1000) + " kHz"
+        : "simulated";
+    }
+
+    // --- Ring buffer (microphone capture) ------------------------------------
+    function ensureRingBuffer() {
+      const needed = Math.ceil(getSampleRate() * RING_SECONDS);
+      if (!ringBuffer || ringBuffer.length !== needed) {
+        ringBuffer = new Float32Array(needed);
+        ringWrite = 0;
+        ringFilled = 0;
+      }
+    }
+
+    function pushToRing(chunk) {
+      ensureRingBuffer();
+      for (let i = 0; i < chunk.length; i++) {
+        ringBuffer[ringWrite] = chunk[i];
+        ringWrite = (ringWrite + 1) % ringBuffer.length;
+        if (ringFilled < ringBuffer.length) {
+          ringFilled += 1;
+        }
+      }
+    }
+
+    function clearRing() {
+      if (!ringBuffer) return;
+      ringBuffer.fill(0);
+      ringWrite = 0;
+      ringFilled = 0;
+    }
+
+    function copyRecentFromRing(count) {
+      ensureRingBuffer();
+      const n = Math.min(count, ringFilled);
+      const out = new Float32Array(n);
+      let index = (ringWrite - n + ringBuffer.length) % ringBuffer.length;
+      for (let i = 0; i < n; i++) {
+        out[i] = ringBuffer[index];
+        index = (index + 1) % ringBuffer.length;
+      }
+      return out;
+    }
+
+    // --- Audio input ---------------------------------------------------------
+    function disconnectCurrentSource() {
+      if (outputNode) {
+        try { outputNode.disconnect(); } catch (_) {}
+        outputNode = null;
+      }
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        stream = null;
+      }
+    }
+
+    function ensureCaptureGraph() {
+      if (captureNode) return;
+
+      captureNode = audioCtx.createScriptProcessor(CAPTURE_SIZE, 1, 1);
+      captureMute = audioCtx.createGain();
+      captureMute.gain.value = 0;
+      captureNode.onaudioprocess = (event) => {
+        if (!isGeneratorMode()) {
+          pushToRing(event.inputBuffer.getChannelData(0));
+        }
+      };
+      captureNode.connect(captureMute);
+      captureMute.connect(audioCtx.destination);
+    }
+
+    function ensureAudioContext() {
+      if (audioCtx) return true;
+
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) {
+        setSourceLabel("Web Audio unsupported");
+        return false;
+      }
+
+      audioCtx = new AudioContextClass();
+      ensureRingBuffer();
+      ensureCaptureGraph();
+      return true;
+    }
+
+    function setupGenerator() {
+      audioInputGeneration += 1;
+      disconnectCurrentSource();
+      clearRing();
+      syncGeneratorSettings();
+      setSourceLabel("Test Generator");
+    }
+
+    function setupMicrophone() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setSourceLabel("Microphone unavailable");
+        return;
+      }
+
+      if (!ensureAudioContext()) return;
+      if (audioCtx.state === "suspended") audioCtx.resume();
+
+      const generation = ++audioInputGeneration;
+      disconnectCurrentSource();
+      clearRing();
+      ensureCaptureGraph();
+      setSourceLabel("Requesting microphone…");
+
+      navigator.mediaDevices
+        .getUserMedia({
+          audio: {
+            autoGainControl: false,
+            echoCancellation: false,
+            noiseSuppression: false,
+          },
+        })
+        .then((mediaStream) => {
+          if (generation !== audioInputGeneration || isGeneratorMode()) {
+            mediaStream.getTracks().forEach((track) => track.stop());
+            return;
+          }
+
+          if (audioCtx.state === "suspended") audioCtx.resume();
+
+          stream = mediaStream;
+          outputNode = audioCtx.createMediaStreamSource(mediaStream);
+          outputNode.connect(captureNode);
+
+          const track = mediaStream.getAudioTracks()[0];
+          setSourceLabel((track && track.label) || "Microphone");
+        })
+        .catch((error) => {
+          if (generation !== audioInputGeneration || isGeneratorMode()) return;
+          setSourceLabel(
+            "Microphone access failed: " + (error.name || "permission denied")
+          );
+        });
+    }
+
+    function setupAudio() {
+      syncGeneratorSettings();
+      if (isGeneratorMode()) {
+        setupGenerator();
+      } else {
+        setupMicrophone();
+      }
+    }
+
+    // --- Settings / UI controls ----------------------------------------------
+    function clampTriggerLevel() {
+      const max = fullScaleVolts();
+      let volts = Math.round(settings.triggerVolts * 10) / 10;
+      volts = Math.max(-max, Math.min(max, volts));
+      if (Math.abs(volts) < 1e-9) volts = 0;
+      settings.triggerVolts = volts;
+      const label = formatTriggerVolts(volts);
+      $("triggerValue").value = label;
+      $("triggerValue").textContent = label;
+    }
+
+    function bumpTriggerLevel(deltaSteps) {
+      settings.triggerVolts =
+        Math.round(settings.triggerVolts * 10 + deltaSteps) / 10;
+      clampTriggerLevel();
+    }
+
+    function readSettings() {
+      settings.timePerDiv = Number($("time").value);
+      settings.voltsPerDiv = Number($("volts").value);
+      settings.triggerMode = $("triggerMode").value;
+      settings.freqSpan = Number($("span").value);
+      settings.dbPerDiv = Number($("dbDiv").value);
+      settings.refLevelDb = Number($("refLevel").value);
+      settings.fftSize = Number($("fftSize").value);
+      syncGeneratorSettings();
+      clampTriggerLevel();
+    }
+
+    function setViewMode(mode) {
+      viewMode = mode;
+      const scopeActive = mode === "scope";
+
+      $("tab-scope").classList.toggle("active", scopeActive);
+      $("tab-spectrum").classList.toggle("active", !scopeActive);
+      $("tab-scope").setAttribute("aria-selected", String(scopeActive));
+      $("tab-spectrum").setAttribute("aria-selected", String(!scopeActive));
+
+      $("scope-controls").classList.toggle("panel-hidden", !scopeActive);
+      $("spectrum-controls").classList.toggle("panel-hidden", scopeActive);
+      $("readouts-scope").classList.toggle("panel-hidden", !scopeActive);
+      $("readouts-spectrum").classList.toggle("panel-hidden", scopeActive);
+    }
+
+    function createStepper({ valueId, selectId, downId, upId }) {
+      const valueEl = $(valueId);
+      const select = $(selectId);
+      const steps = Array.from(select.options).map((option) => ({
+        value: option.value,
+        label: option.textContent,
+      }));
+
+      let index = Math.max(
+        0,
+        steps.findIndex((step) => step.value === select.value)
+      );
+
+      function applyIndex(nextIndex, { silent } = {}) {
+        index = Math.max(0, Math.min(steps.length - 1, nextIndex));
+        const step = steps[index];
+        select.value = step.value;
+        valueEl.value = step.label;
+        valueEl.textContent = step.label;
+        if (!silent) {
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      }
+
+      $(downId).addEventListener("click", () => applyIndex(index - 1));
+      $(upId).addEventListener("click", () => applyIndex(index + 1));
+
+      return {
+        setValue(value) {
+          const next = steps.findIndex((step) => step.value === String(value));
+          applyIndex(next < 0 ? 0 : next, { silent: true });
+        },
+      };
+    }
+
+    // --- Drawing -------------------------------------------------------------
+    function drawGrid(width, height, { crosshair = false } = {}) {
+      ctx.fillStyle = "var(--canvas-bg)";
+      // Canvas doesn't resolve CSS vars in fillStyle on all browsers — use hex.
+      ctx.fillStyle = "#080d0c";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = "#173c2c";
+      ctx.lineWidth = 1;
+
+      for (let i = 0; i <= H_DIVS; i++) {
+        const x = (i * width) / H_DIVS;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+
+      for (let i = 0; i <= V_DIVS; i++) {
+        const y = (i * height) / V_DIVS;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      if (crosshair) {
+        ctx.strokeStyle = "#1a4534";
+        ctx.beginPath();
+        ctx.moveTo(width / 2, 0);
+        ctx.lineTo(width / 2, height);
+        ctx.moveTo(0, height / 2);
+        ctx.lineTo(width, height / 2);
+        ctx.stroke();
+      }
+    }
+
+    function drawTriggerLevel(width, height) {
+      const y = voltsToY(settings.triggerVolts, height);
+      ctx.save();
+      ctx.strokeStyle = "#ffbd6b";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([6, 5]);
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawOverlayLabel(text) {
+      ctx.save();
+      ctx.fillStyle = "#ffbd6b";
+      ctx.font = "600 16px ui-monospace, SFMono-Regular, Menlo, monospace";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillText(text, 14, 12);
+      ctx.restore();
+    }
+
+    function drawWaveform(samples, width, height) {
+      ctx.strokeStyle = "#70f5a4";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+
+      for (let x = 0; x < width; x++) {
+        const sampleIndex = Math.min(
+          samples.length - 1,
+          Math.floor((x / width) * samples.length)
+        );
+        const y = sampleToY(samples[sampleIndex] || 0, height);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+
+      ctx.stroke();
+    }
+
+    function drawSpectrum(magnitudesDb, width, height) {
+      const sampleRate = getSampleRate();
+      const binHz = sampleRate / settings.fftSize;
+      const maxHz = Math.min(settings.freqSpan, sampleRate / 2);
+      const topDb = settings.refLevelDb;
+      const bottomDb = topDb - settings.dbPerDiv * V_DIVS;
+      const maxBin = Math.min(
+        magnitudesDb.length - 1,
+        Math.floor(maxHz / binHz)
+      );
+
+      ctx.strokeStyle = "#70f5a4";
+      ctx.fillStyle = "rgba(112, 245, 164, 0.18)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, height);
+
+      let peakDb = -Infinity;
+      let peakBin = 0;
+      const peakYs = new Array(width);
+
+      for (let x = 0; x < width; x++) {
+        const freq = (x / Math.max(width - 1, 1)) * maxHz;
+        const bin = Math.min(maxBin, Math.round(freq / binHz));
+        const db = magnitudesDb[bin];
+        if (db > peakDb) {
+          peakDb = db;
+          peakBin = bin;
+        }
+        const y = Math.min(
+          height,
+          Math.max(0, ((topDb - db) / (topDb - bottomDb)) * height)
+        );
+        peakYs[x] = y;
+        ctx.lineTo(x, y);
+      }
+
+      ctx.lineTo(width, height);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      const peakHz = peakBin * binHz;
+      const peakX = maxHz > 0 ? (peakHz / maxHz) * (width - 1) : 0;
+      const peakY = peakYs[Math.round(peakX)] ?? height / 2;
+
+      ctx.save();
+      ctx.strokeStyle = "#ffbd6b";
+      ctx.fillStyle = "#ffbd6b";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(peakX, peakY);
+      ctx.lineTo(peakX, Math.max(18, peakY - 18));
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(peakX, peakY, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.font = "600 13px ui-monospace, SFMono-Regular, Menlo, monospace";
+      ctx.textBaseline = "bottom";
+      const label = formatHz(peakHz);
+      const labelWidth = ctx.measureText(label).width;
+      let labelX = peakX + 8;
+      if (labelX + labelWidth > width - 8) {
+        labelX = peakX - 8 - labelWidth;
+      }
+      ctx.fillText(label, Math.max(8, labelX), Math.max(16, peakY - 8));
+      ctx.restore();
+
+      return { peakHz, peakDb };
+    }
+
+    // --- Signal generation / capture -----------------------------------------
+    function sampleWaveform(phaseRadians) {
+      const amp = GENERATOR_AMPLITUDE;
+      if (settings.wave === "square") {
+        return amp * (Math.sin(phaseRadians) >= 0 ? 1 : -1);
+      }
+      return amp * Math.sin(phaseRadians);
+    }
+
+    function findTriggerIndex(samples) {
+      if (settings.triggerMode === "none") return 0;
+
+      const threshold = settings.triggerVolts / fullScaleVolts();
+      for (let i = 1; i < samples.length; i++) {
+        const previous = samples[i - 1];
+        const current = samples[i];
+        const rising =
+          settings.triggerMode === "rising" &&
+          previous < threshold &&
+          current >= threshold;
+        const falling =
+          settings.triggerMode === "falling" &&
+          previous > threshold &&
+          current <= threshold;
+        if (rising || falling) return i;
+      }
+      return -1;
+    }
+
+    function generateSamples(frameTime) {
+      const windowCount = canvas.width;
+      const samplePeriod = (settings.timePerDiv * H_DIVS) / windowCount;
+      const search = new Float32Array(windowCount * 2);
+
+      for (let i = 0; i < search.length; i++) {
+        const t = i * samplePeriod + phase;
+        search[i] = sampleWaveform(t * GENERATOR_FREQUENCY * 2 * Math.PI);
+      }
+
+      phase += (frameTime - lastFrameTime) / 1000;
+
+      let start = 0;
+      if (settings.triggerMode !== "none") {
+        const triggerAt = findTriggerIndex(search);
+        if (triggerAt < 0) return null;
+        start = Math.min(triggerAt, windowCount);
+      }
+
+      return new Float32Array(search.subarray(start, start + windowCount));
+    }
+
+    function captureMicrophoneWindow() {
+      const windowCount = windowSampleCount();
+      const searchCount = Math.min(
+        ringFilled,
+        Math.max(windowCount * 2, windowCount + CAPTURE_SIZE)
+      );
+      const recent = copyRecentFromRing(searchCount);
+
+      if (recent.length < 2) {
+        return settings.triggerMode === "none"
+          ? new Float32Array(windowCount)
+          : null;
+      }
+
+      let start;
+      if (settings.triggerMode === "none") {
+        start = Math.max(0, recent.length - windowCount);
+      } else {
+        const triggerAt = findTriggerIndex(recent);
+        if (triggerAt < 0) return null;
+        start = Math.min(triggerAt, Math.max(0, recent.length - windowCount));
+      }
+
+      const window = new Float32Array(windowCount);
+      for (let i = 0; i < windowCount; i++) {
+        const index = start + i;
+        window[i] = index < recent.length ? recent[index] : 0;
+      }
+      return window;
+    }
+
+    function spectrumTimeSamples(frameTime) {
+      const fftSize = settings.fftSize;
+
+      if (!isGeneratorMode() && stream && ringFilled > 0) {
+        const fromRing = copyRecentFromRing(fftSize);
+        if (fromRing.length === fftSize) return fromRing;
+        const padded = new Float32Array(fftSize);
+        padded.set(fromRing, fftSize - fromRing.length);
+        return padded;
+      }
+
+      const samples = new Float32Array(fftSize);
+      const sampleRate = getSampleRate();
+      for (let i = 0; i < fftSize; i++) {
+        const t = phase + i / sampleRate;
+        samples[i] = sampleWaveform(t * GENERATOR_FREQUENCY * 2 * Math.PI);
+      }
+      phase += (frameTime - lastFrameTime) / 1000;
+      return samples;
+    }
+
+    // --- FFT / measurements --------------------------------------------------
+    function fft(real, imag) {
+      const n = real.length;
+      let j = 0;
+      for (let i = 1; i < n; i++) {
+        let bit = n >> 1;
+        for (; j & bit; bit >>= 1) j ^= bit;
+        j ^= bit;
+        if (i < j) {
+          [real[i], real[j]] = [real[j], real[i]];
+          [imag[i], imag[j]] = [imag[j], imag[i]];
+        }
+      }
+
+      for (let len = 2; len <= n; len <<= 1) {
+        const ang = (-2 * Math.PI) / len;
+        const wlenRe = Math.cos(ang);
+        const wlenIm = Math.sin(ang);
+        for (let i = 0; i < n; i += len) {
+          let wRe = 1;
+          let wIm = 0;
+          for (let k = 0; k < len / 2; k++) {
+            const uRe = real[i + k];
+            const uIm = imag[i + k];
+            const vRe =
+              real[i + k + len / 2] * wRe - imag[i + k + len / 2] * wIm;
+            const vIm =
+              real[i + k + len / 2] * wIm + imag[i + k + len / 2] * wRe;
+            real[i + k] = uRe + vRe;
+            imag[i + k] = uIm + vIm;
+            real[i + k + len / 2] = uRe - vRe;
+            imag[i + k + len / 2] = uIm - vIm;
+            const nextWRe = wRe * wlenRe - wIm * wlenIm;
+            wIm = wRe * wlenIm + wIm * wlenRe;
+            wRe = nextWRe;
+          }
+        }
+      }
+    }
+
+    function computeSpectrum(timeSamples) {
+      const fftSize = timeSamples.length;
+      const real = new Float32Array(fftSize);
+      const imag = new Float32Array(fftSize);
+
+      for (let i = 0; i < fftSize; i++) {
+        const hann = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (fftSize - 1)));
+        real[i] = (timeSamples[i] || 0) * hann;
+      }
+
+      fft(real, imag);
+
+      const bins = fftSize / 2;
+      const magnitudesDb = new Float32Array(bins);
+      const norm = fftSize / 2;
+      for (let k = 0; k < bins; k++) {
+        const mag = Math.hypot(real[k], imag[k]) / norm;
+        magnitudesDb[k] = 20 * Math.log10(mag + 1e-12);
+      }
+      return magnitudesDb;
+    }
+
+    function updateScopeMeasurements(samples) {
+      let min = Infinity;
+      let max = -Infinity;
+      let sumSquares = 0;
+      for (const value of samples) {
+        min = Math.min(min, value);
+        max = Math.max(max, value);
+        sumSquares += value * value;
+      }
+
+      const threshold = settings.triggerVolts / fullScaleVolts();
+      const crossings = [];
+      for (let i = 1; i < samples.length; i++) {
+        if (samples[i - 1] < threshold && samples[i] >= threshold) {
+          crossings.push(i);
+        }
+      }
+
+      const samplePeriod = (settings.timePerDiv * H_DIVS) / samples.length;
+      let measuredHz = 0;
+      if (crossings.length > 1) {
+        const span = crossings.at(-1) - crossings[0];
+        measuredHz = (crossings.length - 1) / (span * samplePeriod);
+      }
+
+      const scale = fullScaleVolts();
+      $("measureFrequency").textContent = measuredHz ? formatHz(measuredHz) : "—";
+      $("measureVpp").textContent = ((max - min) * scale).toFixed(2) + " V";
+      $("measureRms").textContent =
+        Math.sqrt((sumSquares / samples.length) * scale * scale).toFixed(2) + " V";
+      $("measureRate").textContent = audioCtx
+        ? Math.round(getSampleRate() / 1000) + " kHz"
+        : "simulated";
+    }
+
+    function updateSpectrumMeasurements(peak) {
+      $("measurePeakFreq").textContent = Number.isFinite(peak.peakHz)
+        ? formatHz(peak.peakHz)
+        : "—";
+      $("measurePeakDb").textContent = Number.isFinite(peak.peakDb)
+        ? peak.peakDb.toFixed(1) + " dB"
+        : "—";
+      $("measureFftSize").textContent = String(settings.fftSize);
+      $("measureSpecRate").textContent =
+        Math.round(getSampleRate() / 1000) + " kHz";
+    }
+
+    // --- Frame loop ----------------------------------------------------------
+    function drawScopeFrame(frameTime, width, height) {
+      drawGrid(width, height, { crosshair: true });
+      drawTriggerLevel(width, height);
+
+      let samples;
+      if (!paused) {
+        samples =
+          !isGeneratorMode() && stream
+            ? captureMicrophoneWindow()
+            : generateSamples(frameTime);
+        lastFrameTime = frameTime;
+
+        if (!samples) {
+          clearScopeReadouts();
+          drawOverlayLabel("Untriggered");
+          return;
+        }
+        frozenSamples = samples;
+      } else {
+        samples = frozenSamples;
+        if (!samples) {
+          if (settings.triggerMode !== "none") {
+            drawOverlayLabel("Untriggered");
+          }
+          return;
+        }
+      }
+
+      drawWaveform(samples, width, height);
+      drawTriggerLevel(width, height);
+      updateScopeMeasurements(samples);
+    }
+
+    function drawSpectrumFrame(frameTime, width, height) {
+      drawGrid(width, height);
+
+      let magnitudesDb;
+      if (!paused) {
+        magnitudesDb = computeSpectrum(spectrumTimeSamples(frameTime));
+        frozenSpectrum = magnitudesDb;
+        lastFrameTime = frameTime;
+      } else {
+        magnitudesDb = frozenSpectrum;
+        if (!magnitudesDb) return;
+      }
+
+      updateSpectrumMeasurements(drawSpectrum(magnitudesDb, width, height));
+    }
+
+    function drawFrame(frameTime) {
+      requestAnimationFrame(drawFrame);
+      readSettings();
+
+      const width = canvas.width;
+      const height = canvas.height;
+
+      if (viewMode === "spectrum") {
+        drawSpectrumFrame(frameTime, width, height);
+      } else {
+        drawScopeFrame(frameTime, width, height);
+      }
+    }
+
+    // --- Actions / wiring ----------------------------------------------------
+    function togglePause() {
+      paused = !paused;
+      $("pause").textContent = paused ? "Resume" : "Pause";
+      $("pause").classList.toggle("active", paused);
+    }
+
+    function resetControls() {
+      phase = 0;
+      settings.triggerVolts = 0;
+      $("triggerMode").value = "none";
+      timeStepper.setValue("0.001");
+      voltsStepper.setValue("0.5");
+      $("span").value = 10000;
+      $("dbDiv").value = 10;
+      $("refLevel").value = 0;
+      $("fftSize").value = 2048;
+      clampTriggerLevel();
+    }
+
+    const timeStepper = createStepper({
+      valueId: "timeValue",
+      selectId: "time",
+      downId: "timeDown",
+      upId: "timeUp",
+    });
+    const voltsStepper = createStepper({
+      valueId: "voltsValue",
+      selectId: "volts",
+      downId: "voltsDown",
+      upId: "voltsUp",
+    });
+
+    $("triggerDown").onclick = () => bumpTriggerLevel(-1);
+    $("triggerUp").onclick = () => bumpTriggerLevel(1);
+    $("tab-scope").onclick = () => setViewMode("scope");
+    $("tab-spectrum").onclick = () => setViewMode("spectrum");
+    $("input").onchange = setupAudio;
+    $("pause").onclick = togglePause;
+    $("reset").onclick = resetControls;
+
+    document.addEventListener("keydown", (event) => {
+      if (event.code === "Space" && event.target.tagName !== "INPUT") {
+        event.preventDefault();
+        $("pause").click();
+      }
+    });
+
+    canvas.addEventListener("click", (event) => {
+      if (viewMode !== "scope") return;
+      const rect = canvas.getBoundingClientRect();
+      const relativeY = (event.clientY - rect.top) / rect.height;
+      settings.triggerVolts =
+        Math.round((0.5 - relativeY) * fullScaleVolts() * 10) / 10;
+      clampTriggerLevel();
+    });
+
+    setViewMode("scope");
+    setSourceLabel("Test Generator");
+    syncGeneratorSettings();
+    readSettings();
+    drawFrame(0);
+  </script>
+</body>
+</html>
