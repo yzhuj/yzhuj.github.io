@@ -313,7 +313,7 @@
           <div class="control stepper-control">
             <label>dB / div</label>
             <div class="stepper">
-              <output class="stepper-value" id="dbDivValue">10 dB</output>
+              <output class="stepper-value" id="dbDivValue">15 dB</output>
               <div class="stepper-btns">
                 <button type="button" class="stepper-btn" id="dbDivDown" aria-label="Decrease dB per division">−</button>
                 <button type="button" class="stepper-btn" id="dbDivUp" aria-label="Increase dB per division">+</button>
@@ -321,7 +321,8 @@
             </div>
             <select id="dbDiv" class="sr-only" tabindex="-1" aria-hidden="true">
               <option value="5">5 dB</option>
-              <option value="10" selected>10 dB</option>
+              <option value="10">10 dB</option>
+              <option value="15" selected>15 dB</option>
               <option value="20">20 dB</option>
             </select>
           </div>
@@ -449,7 +450,7 @@
       triggerMode: "rising",
       wave: "sine",
       freqSpan: 5000,
-      dbPerDiv: 10,
+      dbPerDiv: 15,
       refLevelDb: 0,
       fftSize: 8192,
       averages: 1,
@@ -467,40 +468,41 @@
       return (Math.round(volts * 10) / 10).toFixed(1) + " V";
     }
 
-    function formatAxisTime(seconds) {
-      if (Math.abs(seconds) < 1e-12) return "0";
-      const a = Math.abs(seconds);
-      if (a >= 1) return seconds.toFixed(2).replace(/\.?0+$/, "") + " s";
-      if (a >= 1e-3) {
-        const ms = seconds * 1e3;
-        return (Number.isInteger(ms) ? String(ms) : ms.toFixed(1)) + " ms";
-      }
-      return Math.round(seconds * 1e6) + " µs";
+    function trimNum(value, digits) {
+      if (Math.abs(value) < 1e-12) return "0";
+      const fixed = value.toFixed(digits);
+      return fixed.replace(/\.?0+$/, "");
     }
 
-    function formatAxisVolts(volts) {
-      if (Math.abs(volts) < 1e-9) return "0";
-      const sign = volts > 0 ? "+" : "";
-      const a = Math.abs(volts);
-      if (a >= 1) return sign + volts.toFixed(1) + " V";
-      return sign + Math.round(volts * 1000) + " mV";
+    function scopeTimeScale() {
+      if (settings.timePerDiv >= 1) return { unit: "s", scale: 1, digits: 2 };
+      if (settings.timePerDiv >= 1e-3) return { unit: "ms", scale: 1e3, digits: 1 };
+      return { unit: "µs", scale: 1e6, digits: 0 };
     }
 
-    function formatAxisHz(hz) {
-      if (hz < 1e-6) return "0";
-      if (hz >= 1000) {
-        const khz = hz / 1000;
-        return (Number.isInteger(khz) ? String(khz) : khz.toFixed(1)) + " kHz";
-      }
-      return Math.round(hz) + " Hz";
+    function scopeVoltsScale() {
+      if (settings.voltsPerDiv >= 0.25) return { unit: "V", scale: 1, digits: 1 };
+      return { unit: "mV", scale: 1e3, digits: 0 };
+    }
+
+    function spectrumHzScale(maxHz) {
+      if (maxHz >= 1000) return { unit: "kHz", scale: 1e-3, digits: 1 };
+      return { unit: "Hz", scale: 1, digits: 0 };
+    }
+
+    function formatTickNumber(value, { scale, digits }) {
+      const scaled = value * scale;
+      if (Math.abs(scaled) < 1e-12) return "0";
+      if (digits === 0) return String(Math.round(scaled));
+      return trimNum(scaled, digits);
     }
 
     function fullScaleVolts() {
       return settings.voltsPerDiv * VERTICAL_FULL_SCALE_DIVS;
     }
 
-    // Plot inset for tick marks and tick value labels (no axis titles).
-    const PLOT_MARGIN = { left: 52, right: 12, top: 12, bottom: 28 };
+    // Plot inset for tick numbers + side unit labels.
+    const PLOT_MARGIN = { left: 120, right: 90, top: 48, bottom: 70 };
 
     function getPlot(width, height) {
       return {
@@ -833,52 +835,76 @@
       ctx.strokeStyle = "#ffffff";
       ctx.fillStyle = "#ffffff";
       ctx.lineWidth = 1;
-      ctx.font = "11px ui-monospace, SFMono-Regular, Menlo, monospace";
+      ctx.font = "28px ui-monospace, SFMono-Regular, Menlo, monospace";
 
-      // Y ticks + values
-      ctx.textAlign = "right";
-      for (let i = 0; i <= V_DIVS; i++) {
-        const y = plot.y + (i * plot.h) / V_DIVS;
-        ctx.beginPath();
-        ctx.moveTo(plot.x - 5, y);
-        ctx.lineTo(plot.x, y);
-        ctx.stroke();
-
-        const label =
-          mode === "scope"
-            ? formatAxisVolts(fullScaleVolts() * (1 - (2 * i) / V_DIVS))
-            : settings.refLevelDb - i * settings.dbPerDiv + " dB";
-
-        ctx.textBaseline =
-          i === 0 ? "top" : i === V_DIVS ? "bottom" : "middle";
-        ctx.fillText(label, plot.x - 8, y);
-      }
-
-      // X ticks + values
-      ctx.textBaseline = "top";
+      const yScale =
+        mode === "scope"
+          ? scopeVoltsScale()
+          : { unit: "dB", scale: 1, digits: 0 };
       const maxHz =
         mode === "spectrum"
           ? Math.min(settings.freqSpan, getSampleRate() / 2)
           : 0;
+      const xScale =
+        mode === "scope" ? scopeTimeScale() : spectrumHzScale(maxHz);
 
+      // Y ticks + bare numbers
+      ctx.textAlign = "right";
+      for (let i = 0; i <= V_DIVS; i++) {
+        const y = plot.y + (i * plot.h) / V_DIVS;
+        ctx.beginPath();
+        ctx.moveTo(plot.x - 10, y);
+        ctx.lineTo(plot.x, y);
+        ctx.stroke();
+
+        const value =
+          mode === "scope"
+            ? fullScaleVolts() * (1 - (2 * i) / V_DIVS)
+            : settings.refLevelDb - i * settings.dbPerDiv;
+        const label =
+          mode === "scope"
+            ? formatTickNumber(value, yScale)
+            : String(value);
+
+        ctx.textBaseline =
+          i === 0 ? "top" : i === V_DIVS ? "bottom" : "middle";
+        ctx.fillText(label, plot.x - 14, y);
+      }
+
+      // X ticks + bare numbers
+      ctx.textBaseline = "top";
       for (let i = 0; i <= H_DIVS; i++) {
         const x = plot.x + (i * plot.w) / H_DIVS;
         ctx.beginPath();
         ctx.moveTo(x, plot.y + plot.h);
-        ctx.lineTo(x, plot.y + plot.h + 5);
+        ctx.lineTo(x, plot.y + plot.h + 10);
         ctx.stroke();
 
-        const label =
+        const value =
           mode === "scope"
-            ? formatAxisTime(i * settings.timePerDiv)
-            : formatAxisHz((i / H_DIVS) * maxHz);
+            ? i * settings.timePerDiv
+            : (i / H_DIVS) * maxHz;
 
         if (i === 0) ctx.textAlign = "left";
         else if (i === H_DIVS) ctx.textAlign = "right";
         else ctx.textAlign = "center";
 
-        ctx.fillText(label, x, plot.y + plot.h + 8);
+        ctx.fillText(formatTickNumber(value, xScale), x, plot.y + plot.h + 14);
       }
+
+      // Unit labels off to the side (not centered on the axis)
+      ctx.font = "600 28px ui-monospace, SFMono-Regular, Menlo, monospace";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "bottom";
+      ctx.fillText(yScale.unit, plot.x - 14, plot.y - 10);
+
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillText(
+        xScale.unit,
+        plot.x + plot.w + 16,
+        plot.y + plot.h + 14
+      );
 
       ctx.restore();
     }
@@ -889,7 +915,7 @@
       ctx.beginPath();
       ctx.rect(plot.x, plot.y, plot.w, plot.h);
       ctx.clip();
-      ctx.strokeStyle = "#ffffff";
+      ctx.strokeStyle = "#ffe14a";
       ctx.lineWidth = 1;
       ctx.setLineDash([6, 5]);
       ctx.beginPath();
@@ -899,14 +925,42 @@
       ctx.restore();
     }
 
-    function drawOverlayLabel(text, plot) {
+    function drawStatusBadge(text, plot) {
       ctx.save();
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "600 16px ui-monospace, SFMono-Regular, Menlo, monospace";
+      const fontSize = 33;
+      ctx.font = `700 ${fontSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+      const padX = 16;
+      const padY = 12;
+      const labelWidth = ctx.measureText(text).width;
+      const boxW = labelWidth + padX * 2 + 10;
+      const boxH = fontSize + padY * 2;
+      const x = plot.x + 14;
+      const y = plot.y + 14;
+
+      ctx.fillStyle = "rgba(0, 0, 0, 0.82)";
+      ctx.fillRect(x, y, boxW, boxH);
+      ctx.fillStyle = "#ffe14a";
+      ctx.fillRect(x, y, 6, boxH);
+
+      ctx.fillStyle = "#ffe14a";
       ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      ctx.fillText(text, plot.x + 10, plot.y + 8);
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, x + padX + 6, y + boxH / 2);
       ctx.restore();
+    }
+
+    function drawScopeStatus(plot, { waitingForTrigger = false } = {}) {
+      if (paused) {
+        drawStatusBadge("PAUSED", plot);
+        return;
+      }
+      if (waitingForTrigger || singleShotArmed) {
+        drawStatusBadge(singleShotArmed ? "ARMED" : "UNTRIGGERED", plot);
+      }
+    }
+
+    function drawSpectrumStatus(plot) {
+      if (paused) drawStatusBadge("PAUSED", plot);
     }
 
     function drawWaveform(samples, plot) {
@@ -1021,18 +1075,18 @@
       ctx.arc(peakX, peakY, 3, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.font = "600 13px ui-monospace, SFMono-Regular, Menlo, monospace";
+      ctx.font = "600 26px ui-monospace, SFMono-Regular, Menlo, monospace";
       ctx.textBaseline = "bottom";
       const label = formatHz(peakHz);
       const labelWidth = ctx.measureText(label).width;
-      let labelX = peakX + 8;
-      if (labelX + labelWidth > plot.x + plot.w - 8) {
-        labelX = peakX - 8 - labelWidth;
+      let labelX = peakX + 10;
+      if (labelX + labelWidth > plot.x + plot.w - 10) {
+        labelX = peakX - 10 - labelWidth;
       }
       ctx.fillText(
         label,
-        Math.max(plot.x + 8, labelX),
-        Math.max(plot.y + 16, peakY - 8)
+        Math.max(plot.x + 10, labelX),
+        Math.max(plot.y + 28, peakY - 10)
       );
       ctx.restore();
 
@@ -1310,7 +1364,7 @@
 
         if (!samples) {
           clearScopeReadouts();
-          drawOverlayLabel(singleShotArmed ? "Armed" : "Untriggered", plot);
+          drawScopeStatus(plot, { waitingForTrigger: true });
           return;
         }
 
@@ -1327,9 +1381,10 @@
       } else {
         samples = frozenSamples;
         if (!samples) {
-          if (settings.triggerMode !== "none" || singleShotArmed) {
-            drawOverlayLabel(singleShotArmed ? "Armed" : "Untriggered", plot);
-          }
+          drawScopeStatus(plot, {
+            waitingForTrigger:
+              settings.triggerMode !== "none" || singleShotArmed,
+          });
           return;
         }
       }
@@ -1337,6 +1392,7 @@
       drawWaveform(samples, plot);
       drawTriggerLevel(plot);
       updateScopeMeasurements(samples);
+      drawScopeStatus(plot);
     }
 
     function drawSpectrumFrame(frameTime, width, height) {
@@ -1349,10 +1405,14 @@
         lastFrameTime = frameTime;
       } else {
         magnitudesDb = frozenSpectrum;
-        if (!magnitudesDb) return;
+        if (!magnitudesDb) {
+          drawSpectrumStatus(plot);
+          return;
+        }
       }
 
       updateSpectrumMeasurements(drawSpectrum(magnitudesDb, plot));
+      drawSpectrumStatus(plot);
     }
 
     function drawFrame(frameTime) {
