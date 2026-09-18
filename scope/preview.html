@@ -442,6 +442,7 @@
     let ringFilled = 0;
     let spectrumAvgPower = null;
     let spectrumAvgCount = 0;
+    let micStatusMessage = null;
 
     const settings = {
       timePerDiv: 0.001,
@@ -640,20 +641,26 @@
       disconnectCurrentSource();
       clearRing();
       syncGeneratorSettings();
+      micStatusMessage = null;
     }
 
     function setupMicrophone() {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        micStatusMessage = "NO MICROPHONE FOUND";
         return;
       }
 
-      if (!ensureAudioContext()) return;
+      if (!ensureAudioContext()) {
+        micStatusMessage = "NO MICROPHONE FOUND";
+        return;
+      }
       if (audioCtx.state === "suspended") audioCtx.resume();
 
       const generation = ++audioInputGeneration;
       disconnectCurrentSource();
       clearRing();
       ensureCaptureGraph();
+      micStatusMessage = "REQUESTING MICROPHONE…";
 
       navigator.mediaDevices
         .getUserMedia({
@@ -674,9 +681,25 @@
           stream = mediaStream;
           outputNode = audioCtx.createMediaStreamSource(mediaStream);
           outputNode.connect(captureNode);
+          micStatusMessage = null;
         })
-        .catch(() => {
-          // Permission denied or device error — stay disconnected.
+        .catch((error) => {
+          if (generation !== audioInputGeneration || isGeneratorMode()) return;
+          const name = error && error.name;
+          if (
+            name === "NotFoundError" ||
+            name === "DevicesNotFoundError" ||
+            name === "OverconstrainedError"
+          ) {
+            micStatusMessage = "NO MICROPHONE FOUND";
+          } else if (
+            name === "NotAllowedError" ||
+            name === "PermissionDeniedError"
+          ) {
+            micStatusMessage = "MIC PERMISSION DENIED";
+          } else {
+            micStatusMessage = "NO MICROPHONE FOUND";
+          }
         });
     }
 
@@ -925,7 +948,7 @@
       ctx.restore();
     }
 
-    function drawStatusBadge(text, plot) {
+    function drawStatusBadge(text, plot, topY) {
       ctx.save();
       const fontSize = 33;
       ctx.font = `700 ${fontSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
@@ -935,7 +958,7 @@
       const boxW = labelWidth + padX * 2 + 10;
       const boxH = fontSize + padY * 2;
       const x = plot.x + 14;
-      const y = plot.y + 14;
+      const y = topY;
 
       ctx.fillStyle = "rgba(0, 0, 0, 0.82)";
       ctx.fillRect(x, y, boxW, boxH);
@@ -947,20 +970,37 @@
       ctx.textBaseline = "middle";
       ctx.fillText(text, x + padX + 6, y + boxH / 2);
       ctx.restore();
+      return boxH;
+    }
+
+    function drawStatusStack(plot, labels) {
+      let topY = plot.y + 14;
+      for (const text of labels) {
+        if (!text) continue;
+        topY += drawStatusBadge(text, plot, topY) + 10;
+      }
+    }
+
+    function micStatusLabel() {
+      return !isGeneratorMode() ? micStatusMessage : null;
     }
 
     function drawScopeStatus(plot, { waitingForTrigger = false } = {}) {
+      const labels = [];
       if (paused) {
-        drawStatusBadge("PAUSED", plot);
-        return;
+        labels.push("PAUSED");
+      } else if (waitingForTrigger || singleShotArmed) {
+        labels.push(singleShotArmed ? "ARMED" : "UNTRIGGERED");
       }
-      if (waitingForTrigger || singleShotArmed) {
-        drawStatusBadge(singleShotArmed ? "ARMED" : "UNTRIGGERED", plot);
-      }
+      labels.push(micStatusLabel());
+      drawStatusStack(plot, labels);
     }
 
     function drawSpectrumStatus(plot) {
-      if (paused) drawStatusBadge("PAUSED", plot);
+      const labels = [];
+      if (paused) labels.push("PAUSED");
+      labels.push(micStatusLabel());
+      drawStatusStack(plot, labels);
     }
 
     function drawWaveform(samples, plot) {
