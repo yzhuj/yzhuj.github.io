@@ -10,14 +10,12 @@
       --bg: #101419;
       --panel: #171d24;
       --line: #2a3540;
-      --text: #e8eef2;
-      --muted: #91a0ac;
-      --green: #71f4a5;
-      --orange: #ffbd6b;
-      --canvas-bg: #080d0c;
-      --grid: #173c2c;
-      --grid-axis: #1a4534;
+      --text: #ffffff;
+      --muted: #ffffff;
       --trace: #70f5a4;
+      --canvas-bg: #000000;
+      --grid: #2a2a2a;
+      --grid-axis: #3a3a3a;
     }
 
     * { box-sizing: border-box; }
@@ -51,39 +49,29 @@
       border-radius: 0;
       border-right: 1px solid var(--line);
       background: transparent;
-      color: var(--muted);
+      color: #ffffff;
       padding: 12px 16px;
       font: 600 12px/1.4 inherit;
       letter-spacing: 0.04em;
       text-transform: uppercase;
       cursor: pointer;
+      opacity: 0.55;
     }
 
     .tab:last-child { border-right: none; }
-    .tab:hover { color: var(--text); }
+    .tab:hover { opacity: 0.85; }
     .tab.active {
-      color: var(--green);
-      background: #090d10;
+      color: #ffffff;
+      background: #000;
+      opacity: 1;
     }
 
     .scope {
       overflow: hidden;
       border: 1px solid var(--line);
       border-radius: 0 0 12px 12px;
-      background: #090d10;
+      background: #000;
       box-shadow: 0 14px 42px #0006;
-    }
-
-    .source-bar {
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--line);
-      background: #0c1216;
-    }
-
-    #sourceLabel {
-      color: var(--green);
-      font-weight: 600;
-      font-size: 13px;
     }
 
     canvas {
@@ -135,7 +123,7 @@
     .stepper-value {
       min-width: 3.6em;
       text-align: left;
-      color: var(--green);
+      color: #ffffff;
       font: 600 13px ui-monospace, SFMono-Regular, Menlo, monospace;
     }
 
@@ -156,7 +144,7 @@
 
     label,
     .readout-label {
-      color: var(--muted);
+      color: #ffffff;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -164,21 +152,21 @@
 
     select,
     button {
-      color: var(--text);
+      color: #ffffff;
       background: #222b34;
       border: 1px solid #3b4955;
       border-radius: 6px;
       padding: 8px 10px;
       font: inherit;
-      accent-color: var(--green);
+      accent-color: #ffffff;
     }
 
     button { cursor: pointer; }
-    button:hover { border-color: var(--green); }
+    button:hover { border-color: #ffffff; }
     button.active {
-      color: #111;
-      background: var(--orange);
-      border-color: var(--orange);
+      color: #ffffff;
+      background: #3a4550;
+      border-color: #ffffff;
     }
 
     .readouts {
@@ -196,7 +184,7 @@
 
     .readout-value {
       margin-top: 3px;
-      color: var(--green);
+      color: #ffffff;
       font: 600 18px ui-monospace, SFMono-Regular, Menlo, monospace;
     }
 
@@ -215,18 +203,14 @@
     </div>
 
     <section class="scope">
-      <div class="source-bar">
-        <span id="sourceLabel">Test Generator</span>
-      </div>
-
-      <canvas id="scope" width="1200" height="600"></canvas>
+      <canvas id="scope" width="2400" height="1200"></canvas>
 
       <div class="toolbar">
         <div class="control">
           <label for="input">Input</label>
           <select id="input">
-            <option value="sine">1 kHz sine wave</option>
-            <option value="square">1 kHz square wave</option>
+            <option value="sine">Sine wave</option>
+            <option value="triangle">Triangle wave</option>
             <option value="microphone">Microphone</option>
           </select>
         </div>
@@ -253,7 +237,7 @@
           <div class="control stepper-control">
             <label>Volts / div</label>
             <div class="stepper">
-              <output class="stepper-value" id="voltsValue">0.5 V</output>
+              <output class="stepper-value" id="voltsValue">1 V</output>
               <div class="stepper-btns">
                 <button type="button" class="stepper-btn" id="voltsDown" aria-label="Decrease volts per division">−</button>
                 <button type="button" class="stepper-btn" id="voltsUp" aria-label="Increase volts per division">+</button>
@@ -262,8 +246,8 @@
             <select id="volts" class="sr-only" tabindex="-1" aria-hidden="true">
               <option value="0.1">0.1 V</option>
               <option value="0.25">0.25 V</option>
-              <option value="0.5" selected>0.5 V</option>
-              <option value="1">1 V</option>
+              <option value="0.5">0.5 V</option>
+              <option value="1" selected>1 V</option>
               <option value="2">2 V</option>
             </select>
           </div>
@@ -282,8 +266,8 @@
           <div class="control">
             <label for="triggerMode">Trigger</label>
             <select id="triggerMode">
-              <option value="none" selected>Untriggered</option>
-              <option value="rising">Rising</option>
+              <option value="none">Untriggered</option>
+              <option value="rising" selected>Rising</option>
               <option value="falling">Falling</option>
             </select>
           </div>
@@ -292,41 +276,88 @@
         </div>
 
         <div id="spectrum-controls" class="display-contents panel-hidden">
-          <div class="control">
-            <label for="fftSize">FFT size</label>
-            <select id="fftSize">
+          <div class="control stepper-control">
+            <label>FFT size</label>
+            <div class="stepper">
+              <output class="stepper-value" id="fftSizeValue">8192</output>
+              <div class="stepper-btns">
+                <button type="button" class="stepper-btn" id="fftSizeDown" aria-label="Decrease FFT size">−</button>
+                <button type="button" class="stepper-btn" id="fftSizeUp" aria-label="Increase FFT size">+</button>
+              </div>
+            </div>
+            <select id="fftSize" class="sr-only" tabindex="-1" aria-hidden="true">
               <option value="512">512</option>
               <option value="1024">1024</option>
-              <option value="2048" selected>2048</option>
+              <option value="2048">2048</option>
               <option value="4096">4096</option>
-              <option value="8192">8192</option>
+              <option value="8192" selected>8192</option>
               <option value="16384">16384</option>
             </select>
           </div>
-          <div class="control">
-            <label for="span">Freq span</label>
-            <select id="span">
+          <div class="control stepper-control">
+            <label>Freq span</label>
+            <div class="stepper">
+              <output class="stepper-value" id="spanValue">5 kHz</output>
+              <div class="stepper-btns">
+                <button type="button" class="stepper-btn" id="spanDown" aria-label="Decrease frequency span">−</button>
+                <button type="button" class="stepper-btn" id="spanUp" aria-label="Increase frequency span">+</button>
+              </div>
+            </div>
+            <select id="span" class="sr-only" tabindex="-1" aria-hidden="true">
               <option value="1000">1 kHz</option>
-              <option value="5000">5 kHz</option>
-              <option value="10000" selected>10 kHz</option>
+              <option value="5000" selected>5 kHz</option>
+              <option value="10000">10 kHz</option>
               <option value="20000">20 kHz</option>
             </select>
           </div>
-          <div class="control">
-            <label for="dbDiv">dB / div</label>
-            <select id="dbDiv">
+          <div class="control stepper-control">
+            <label>dB / div</label>
+            <div class="stepper">
+              <output class="stepper-value" id="dbDivValue">10 dB</output>
+              <div class="stepper-btns">
+                <button type="button" class="stepper-btn" id="dbDivDown" aria-label="Decrease dB per division">−</button>
+                <button type="button" class="stepper-btn" id="dbDivUp" aria-label="Increase dB per division">+</button>
+              </div>
+            </div>
+            <select id="dbDiv" class="sr-only" tabindex="-1" aria-hidden="true">
               <option value="5">5 dB</option>
               <option value="10" selected>10 dB</option>
               <option value="20">20 dB</option>
             </select>
           </div>
-          <div class="control">
-            <label for="refLevel">Ref level</label>
-            <select id="refLevel">
-              <option value="0" selected>0 dBFS</option>
-              <option value="-10">−10 dBFS</option>
-              <option value="-20">−20 dBFS</option>
+          <div class="control stepper-control">
+            <label>Ref level</label>
+            <div class="stepper">
+              <output class="stepper-value" id="refLevelValue">0 dBFS</output>
+              <div class="stepper-btns">
+                <button type="button" class="stepper-btn" id="refLevelDown" aria-label="Decrease reference level">−</button>
+                <button type="button" class="stepper-btn" id="refLevelUp" aria-label="Increase reference level">+</button>
+              </div>
+            </div>
+            <select id="refLevel" class="sr-only" tabindex="-1" aria-hidden="true">
               <option value="-40">−40 dBFS</option>
+              <option value="-20">−20 dBFS</option>
+              <option value="-10">−10 dBFS</option>
+              <option value="0" selected>0 dBFS</option>
+            </select>
+          </div>
+          <div class="control stepper-control">
+            <label>Averages</label>
+            <div class="stepper">
+              <output class="stepper-value" id="averagesValue">1</output>
+              <div class="stepper-btns">
+                <button type="button" class="stepper-btn" id="averagesDown" aria-label="Decrease number of averages">−</button>
+                <button type="button" class="stepper-btn" id="averagesUp" aria-label="Increase number of averages">+</button>
+              </div>
+            </div>
+            <select id="averages" class="sr-only" tabindex="-1" aria-hidden="true">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="4">4</option>
+              <option value="8">8</option>
+              <option value="16">16</option>
+              <option value="32">32</option>
+              <option value="64">64</option>
             </select>
           </div>
         </div>
@@ -408,17 +439,20 @@
     let ringBuffer = null;
     let ringWrite = 0;
     let ringFilled = 0;
+    let spectrumAvgPower = null;
+    let spectrumAvgCount = 0;
 
     const settings = {
       timePerDiv: 0.001,
-      voltsPerDiv: 0.5,
+      voltsPerDiv: 1,
       triggerVolts: 0,
-      triggerMode: "none",
+      triggerMode: "rising",
       wave: "sine",
-      freqSpan: 10000,
+      freqSpan: 5000,
       dbPerDiv: 10,
       refLevelDb: 0,
-      fftSize: 2048,
+      fftSize: 8192,
+      averages: 1,
     };
 
     // --- Helpers -------------------------------------------------------------
@@ -433,8 +467,48 @@
       return (Math.round(volts * 10) / 10).toFixed(1) + " V";
     }
 
+    function formatAxisTime(seconds) {
+      if (Math.abs(seconds) < 1e-12) return "0";
+      const a = Math.abs(seconds);
+      if (a >= 1) return seconds.toFixed(2).replace(/\.?0+$/, "") + " s";
+      if (a >= 1e-3) {
+        const ms = seconds * 1e3;
+        return (Number.isInteger(ms) ? String(ms) : ms.toFixed(1)) + " ms";
+      }
+      return Math.round(seconds * 1e6) + " µs";
+    }
+
+    function formatAxisVolts(volts) {
+      if (Math.abs(volts) < 1e-9) return "0";
+      const sign = volts > 0 ? "+" : "";
+      const a = Math.abs(volts);
+      if (a >= 1) return sign + volts.toFixed(1) + " V";
+      return sign + Math.round(volts * 1000) + " mV";
+    }
+
+    function formatAxisHz(hz) {
+      if (hz < 1e-6) return "0";
+      if (hz >= 1000) {
+        const khz = hz / 1000;
+        return (Number.isInteger(khz) ? String(khz) : khz.toFixed(1)) + " kHz";
+      }
+      return Math.round(hz) + " Hz";
+    }
+
     function fullScaleVolts() {
       return settings.voltsPerDiv * VERTICAL_FULL_SCALE_DIVS;
+    }
+
+    // Plot inset for tick marks and tick value labels (no axis titles).
+    const PLOT_MARGIN = { left: 52, right: 12, top: 12, bottom: 28 };
+
+    function getPlot(width, height) {
+      return {
+        x: PLOT_MARGIN.left,
+        y: PLOT_MARGIN.top,
+        w: width - PLOT_MARGIN.left - PLOT_MARGIN.right,
+        h: height - PLOT_MARGIN.top - PLOT_MARGIN.bottom,
+      };
     }
 
     function getSampleRate() {
@@ -447,22 +521,22 @@
 
     function syncGeneratorSettings() {
       const mode = $("input").value;
-      if (mode === "sine" || mode === "square") {
+      if (mode === "sine" || mode === "triangle") {
         settings.wave = mode;
       }
     }
 
-    function setSourceLabel(text) {
-      $("sourceLabel").textContent = text;
-    }
-
-    function sampleToY(sample, height) {
+    function sampleToY(sample, plot) {
       const scale = fullScaleVolts();
-      return height / 2 - (sample / scale) * height * VERTICAL_FULL_SCALE_DIVS;
+      return (
+        plot.y +
+        plot.h / 2 -
+        (sample / scale) * plot.h * VERTICAL_FULL_SCALE_DIVS
+      );
     }
 
-    function voltsToY(volts, height) {
-      return sampleToY(volts / fullScaleVolts(), height);
+    function voltsToY(volts, plot) {
+      return sampleToY(volts / fullScaleVolts(), plot);
     }
 
     function windowSampleCount() {
@@ -550,7 +624,6 @@
 
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) {
-        setSourceLabel("Web Audio unsupported");
         return false;
       }
 
@@ -565,12 +638,10 @@
       disconnectCurrentSource();
       clearRing();
       syncGeneratorSettings();
-      setSourceLabel("Test Generator");
     }
 
     function setupMicrophone() {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setSourceLabel("Microphone unavailable");
         return;
       }
 
@@ -581,7 +652,6 @@
       disconnectCurrentSource();
       clearRing();
       ensureCaptureGraph();
-      setSourceLabel("Requesting microphone…");
 
       navigator.mediaDevices
         .getUserMedia({
@@ -602,15 +672,9 @@
           stream = mediaStream;
           outputNode = audioCtx.createMediaStreamSource(mediaStream);
           outputNode.connect(captureNode);
-
-          const track = mediaStream.getAudioTracks()[0];
-          setSourceLabel((track && track.label) || "Microphone");
         })
-        .catch((error) => {
-          if (generation !== audioInputGeneration || isGeneratorMode()) return;
-          setSourceLabel(
-            "Microphone access failed: " + (error.name || "permission denied")
-          );
+        .catch(() => {
+          // Permission denied or device error — stay disconnected.
         });
     }
 
@@ -648,7 +712,16 @@
       settings.freqSpan = Number($("span").value);
       settings.dbPerDiv = Number($("dbDiv").value);
       settings.refLevelDb = Number($("refLevel").value);
-      settings.fftSize = Number($("fftSize").value);
+      const nextFftSize = Number($("fftSize").value);
+      const nextAverages = Number($("averages").value);
+      if (
+        nextFftSize !== settings.fftSize ||
+        nextAverages !== settings.averages
+      ) {
+        resetSpectrumAverage();
+      }
+      settings.fftSize = nextFftSize;
+      settings.averages = nextAverages;
       syncGeneratorSettings();
       clampTriggerLevel();
     }
@@ -704,84 +777,184 @@
     }
 
     // --- Drawing -------------------------------------------------------------
-    function drawGrid(width, height, { crosshair = false } = {}) {
-      ctx.fillStyle = "var(--canvas-bg)";
-      // Canvas doesn't resolve CSS vars in fillStyle on all browsers — use hex.
-      ctx.fillStyle = "#080d0c";
+    function drawGrid(width, height, { crosshair = false, mode = "scope" } = {}) {
+      ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, width, height);
 
-      ctx.strokeStyle = "#173c2c";
+      const plot = getPlot(width, height);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(plot.x, plot.y, plot.w, plot.h);
+      ctx.clip();
+
+      ctx.strokeStyle = "#2a2a2a";
       ctx.lineWidth = 1;
 
       for (let i = 0; i <= H_DIVS; i++) {
-        const x = (i * width) / H_DIVS;
+        const x = plot.x + (i * plot.w) / H_DIVS;
         ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
+        ctx.moveTo(x, plot.y);
+        ctx.lineTo(x, plot.y + plot.h);
         ctx.stroke();
       }
 
       for (let i = 0; i <= V_DIVS; i++) {
-        const y = (i * height) / V_DIVS;
+        const y = plot.y + (i * plot.h) / V_DIVS;
         ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
+        ctx.moveTo(plot.x, y);
+        ctx.lineTo(plot.x + plot.w, y);
         ctx.stroke();
       }
 
       if (crosshair) {
-        ctx.strokeStyle = "#1a4534";
+        ctx.strokeStyle = "#3a3a3a";
         ctx.beginPath();
-        ctx.moveTo(width / 2, 0);
-        ctx.lineTo(width / 2, height);
-        ctx.moveTo(0, height / 2);
-        ctx.lineTo(width, height / 2);
+        ctx.moveTo(plot.x + plot.w / 2, plot.y);
+        ctx.lineTo(plot.x + plot.w / 2, plot.y + plot.h);
+        ctx.moveTo(plot.x, plot.y + plot.h / 2);
+        ctx.lineTo(plot.x + plot.w, plot.y + plot.h / 2);
         ctx.stroke();
       }
+
+      ctx.restore();
+
+      // Plot border
+      ctx.strokeStyle = "#555555";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(plot.x + 0.5, plot.y + 0.5, plot.w - 1, plot.h - 1);
+
+      drawAxisTicks(plot, mode);
+      return plot;
     }
 
-    function drawTriggerLevel(width, height) {
-      const y = voltsToY(settings.triggerVolts, height);
+    function drawAxisTicks(plot, mode) {
       ctx.save();
-      ctx.strokeStyle = "#ffbd6b";
+      ctx.strokeStyle = "#ffffff";
+      ctx.fillStyle = "#ffffff";
+      ctx.lineWidth = 1;
+      ctx.font = "11px ui-monospace, SFMono-Regular, Menlo, monospace";
+
+      // Y ticks + values
+      ctx.textAlign = "right";
+      for (let i = 0; i <= V_DIVS; i++) {
+        const y = plot.y + (i * plot.h) / V_DIVS;
+        ctx.beginPath();
+        ctx.moveTo(plot.x - 5, y);
+        ctx.lineTo(plot.x, y);
+        ctx.stroke();
+
+        const label =
+          mode === "scope"
+            ? formatAxisVolts(fullScaleVolts() * (1 - (2 * i) / V_DIVS))
+            : settings.refLevelDb - i * settings.dbPerDiv + " dB";
+
+        ctx.textBaseline =
+          i === 0 ? "top" : i === V_DIVS ? "bottom" : "middle";
+        ctx.fillText(label, plot.x - 8, y);
+      }
+
+      // X ticks + values
+      ctx.textBaseline = "top";
+      const maxHz =
+        mode === "spectrum"
+          ? Math.min(settings.freqSpan, getSampleRate() / 2)
+          : 0;
+
+      for (let i = 0; i <= H_DIVS; i++) {
+        const x = plot.x + (i * plot.w) / H_DIVS;
+        ctx.beginPath();
+        ctx.moveTo(x, plot.y + plot.h);
+        ctx.lineTo(x, plot.y + plot.h + 5);
+        ctx.stroke();
+
+        const label =
+          mode === "scope"
+            ? formatAxisTime(i * settings.timePerDiv)
+            : formatAxisHz((i / H_DIVS) * maxHz);
+
+        if (i === 0) ctx.textAlign = "left";
+        else if (i === H_DIVS) ctx.textAlign = "right";
+        else ctx.textAlign = "center";
+
+        ctx.fillText(label, x, plot.y + plot.h + 8);
+      }
+
+      ctx.restore();
+    }
+
+    function drawTriggerLevel(plot) {
+      const y = voltsToY(settings.triggerVolts, plot);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(plot.x, plot.y, plot.w, plot.h);
+      ctx.clip();
+      ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 1;
       ctx.setLineDash([6, 5]);
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
+      ctx.moveTo(plot.x, y);
+      ctx.lineTo(plot.x + plot.w, y);
       ctx.stroke();
       ctx.restore();
     }
 
-    function drawOverlayLabel(text) {
+    function drawOverlayLabel(text, plot) {
       ctx.save();
-      ctx.fillStyle = "#ffbd6b";
+      ctx.fillStyle = "#ffffff";
       ctx.font = "600 16px ui-monospace, SFMono-Regular, Menlo, monospace";
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-      ctx.fillText(text, 14, 12);
+      ctx.fillText(text, plot.x + 10, plot.y + 8);
       ctx.restore();
     }
 
-    function drawWaveform(samples, width, height) {
+    function drawWaveform(samples, plot) {
+      const n = samples.length;
+      if (n < 2) return;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(plot.x, plot.y, plot.w, plot.h);
+      ctx.clip();
+
       ctx.strokeStyle = "#70f5a4";
       ctx.lineWidth = 2;
       ctx.beginPath();
 
-      for (let x = 0; x < width; x++) {
-        const sampleIndex = Math.min(
-          samples.length - 1,
-          Math.floor((x / width) * samples.length)
-        );
-        const y = sampleToY(samples[sampleIndex] || 0, height);
-        if (x === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+      if (n <= plot.w) {
+        // Draw every sample across the plot width.
+        for (let i = 0; i < n; i++) {
+          const x = plot.x + (i / (n - 1)) * (plot.w - 1);
+          const y = sampleToY(samples[i] || 0, plot);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+      } else {
+        // More samples than pixels: min/max envelope per column so peaks aren't lost.
+        for (let i = 0; i < plot.w; i++) {
+          const start = Math.floor((i / plot.w) * n);
+          const end = Math.max(start + 1, Math.floor(((i + 1) / plot.w) * n));
+          let min = Infinity;
+          let max = -Infinity;
+          for (let j = start; j < end; j++) {
+            const value = samples[j] || 0;
+            if (value < min) min = value;
+            if (value > max) max = value;
+          }
+          const x = plot.x + i;
+          const yMin = sampleToY(min, plot);
+          const yMax = sampleToY(max, plot);
+          ctx.moveTo(x, yMin);
+          ctx.lineTo(x, yMax);
+        }
       }
 
       ctx.stroke();
+      ctx.restore();
     }
 
-    function drawSpectrum(magnitudesDb, width, height) {
+    function drawSpectrum(magnitudesDb, plot) {
       const sampleRate = getSampleRate();
       const binHz = sampleRate / settings.fftSize;
       const maxHz = Math.min(settings.freqSpan, sampleRate / 2);
@@ -792,18 +965,23 @@
         Math.floor(maxHz / binHz)
       );
 
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(plot.x, plot.y, plot.w, plot.h);
+      ctx.clip();
+
       ctx.strokeStyle = "#70f5a4";
       ctx.fillStyle = "rgba(112, 245, 164, 0.18)";
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(0, height);
+      ctx.moveTo(plot.x, plot.y + plot.h);
 
       let peakDb = -Infinity;
       let peakBin = 0;
-      const peakYs = new Array(width);
+      const peakYs = new Array(Math.ceil(plot.w));
 
-      for (let x = 0; x < width; x++) {
-        const freq = (x / Math.max(width - 1, 1)) * maxHz;
+      for (let i = 0; i < plot.w; i++) {
+        const freq = (i / Math.max(plot.w - 1, 1)) * maxHz;
         const bin = Math.min(maxBin, Math.round(freq / binHz));
         const db = magnitudesDb[bin];
         if (db > peakDb) {
@@ -811,29 +989,33 @@
           peakBin = bin;
         }
         const y = Math.min(
-          height,
-          Math.max(0, ((topDb - db) / (topDb - bottomDb)) * height)
+          plot.y + plot.h,
+          Math.max(
+            plot.y,
+            plot.y + ((topDb - db) / (topDb - bottomDb)) * plot.h
+          )
         );
-        peakYs[x] = y;
-        ctx.lineTo(x, y);
+        peakYs[i] = y;
+        ctx.lineTo(plot.x + i, y);
       }
 
-      ctx.lineTo(width, height);
+      ctx.lineTo(plot.x + plot.w, plot.y + plot.h);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
       const peakHz = peakBin * binHz;
-      const peakX = maxHz > 0 ? (peakHz / maxHz) * (width - 1) : 0;
-      const peakY = peakYs[Math.round(peakX)] ?? height / 2;
+      const peakX =
+        plot.x + (maxHz > 0 ? (peakHz / maxHz) * (plot.w - 1) : 0);
+      const peakY =
+        peakYs[Math.round(peakX - plot.x)] ?? plot.y + plot.h / 2;
 
-      ctx.save();
-      ctx.strokeStyle = "#ffbd6b";
-      ctx.fillStyle = "#ffbd6b";
+      ctx.strokeStyle = "#ffffff";
+      ctx.fillStyle = "#ffffff";
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(peakX, peakY);
-      ctx.lineTo(peakX, Math.max(18, peakY - 18));
+      ctx.lineTo(peakX, Math.max(plot.y + 18, peakY - 18));
       ctx.stroke();
       ctx.beginPath();
       ctx.arc(peakX, peakY, 3, 0, Math.PI * 2);
@@ -844,10 +1026,14 @@
       const label = formatHz(peakHz);
       const labelWidth = ctx.measureText(label).width;
       let labelX = peakX + 8;
-      if (labelX + labelWidth > width - 8) {
+      if (labelX + labelWidth > plot.x + plot.w - 8) {
         labelX = peakX - 8 - labelWidth;
       }
-      ctx.fillText(label, Math.max(8, labelX), Math.max(16, peakY - 8));
+      ctx.fillText(
+        label,
+        Math.max(plot.x + 8, labelX),
+        Math.max(plot.y + 16, peakY - 8)
+      );
       ctx.restore();
 
       return { peakHz, peakDb };
@@ -856,8 +1042,10 @@
     // --- Signal generation / capture -----------------------------------------
     function sampleWaveform(phaseRadians) {
       const amp = GENERATOR_VPP / 2 / fullScaleVolts();
-      if (settings.wave === "square") {
-        return amp * (Math.sin(phaseRadians) >= 0 ? 1 : -1);
+      if (settings.wave === "triangle") {
+        const p = ((phaseRadians / (2 * Math.PI)) % 1 + 1) % 1;
+        const tri = p < 0.5 ? 4 * p - 1 : 3 - 4 * p;
+        return amp * tri;
       }
       return amp * Math.sin(phaseRadians);
     }
@@ -883,7 +1071,8 @@
     }
 
     function generateSamples(frameTime) {
-      const windowCount = canvas.width;
+      // Oversample relative to the display so the trace stays smooth on fast timebases.
+      const windowCount = Math.max(windowSampleCount(), canvas.width * 4);
       const samplePeriod = (settings.timePerDiv * H_DIVS) / windowCount;
       const search = new Float32Array(windowCount * 2);
 
@@ -996,7 +1185,7 @@
       }
     }
 
-    function computeSpectrum(timeSamples) {
+    function computeSpectrumPower(timeSamples) {
       const fftSize = timeSamples.length;
       const real = new Float32Array(fftSize);
       const imag = new Float32Array(fftSize);
@@ -1009,13 +1198,54 @@
       fft(real, imag);
 
       const bins = fftSize / 2;
-      const magnitudesDb = new Float32Array(bins);
+      const power = new Float32Array(bins);
       const norm = fftSize / 2;
       for (let k = 0; k < bins; k++) {
         const mag = Math.hypot(real[k], imag[k]) / norm;
-        magnitudesDb[k] = 20 * Math.log10(mag + 1e-12);
+        power[k] = mag * mag;
+      }
+      return power;
+    }
+
+    function powerToDb(power) {
+      const magnitudesDb = new Float32Array(power.length);
+      for (let k = 0; k < power.length; k++) {
+        magnitudesDb[k] = 10 * Math.log10(power[k] + 1e-24);
       }
       return magnitudesDb;
+    }
+
+    function resetSpectrumAverage() {
+      spectrumAvgPower = null;
+      spectrumAvgCount = 0;
+    }
+
+    function computeAveragedSpectrum(timeSamples) {
+      const power = computeSpectrumPower(timeSamples);
+      const nAvg = Math.max(1, settings.averages);
+
+      if (nAvg <= 1) {
+        resetSpectrumAverage();
+        return powerToDb(power);
+      }
+
+      if (!spectrumAvgPower || spectrumAvgPower.length !== power.length) {
+        spectrumAvgPower = new Float32Array(power.length);
+        spectrumAvgCount = 0;
+      }
+
+      // Exponential average with effective length nAvg (power domain).
+      const alpha = 1 / nAvg;
+      if (spectrumAvgCount === 0) {
+        spectrumAvgPower.set(power);
+      } else {
+        for (let k = 0; k < power.length; k++) {
+          spectrumAvgPower[k] =
+            spectrumAvgPower[k] * (1 - alpha) + power[k] * alpha;
+        }
+      }
+      spectrumAvgCount = Math.min(spectrumAvgCount + 1, nAvg);
+      return powerToDb(spectrumAvgPower);
     }
 
     function updateScopeMeasurements(samples) {
@@ -1067,8 +1297,8 @@
 
     // --- Frame loop ----------------------------------------------------------
     function drawScopeFrame(frameTime, width, height) {
-      drawGrid(width, height, { crosshair: true });
-      drawTriggerLevel(width, height);
+      const plot = drawGrid(width, height, { crosshair: true, mode: "scope" });
+      drawTriggerLevel(plot);
 
       let samples;
       if (!paused) {
@@ -1080,7 +1310,7 @@
 
         if (!samples) {
           clearScopeReadouts();
-          drawOverlayLabel(singleShotArmed ? "Armed" : "Untriggered");
+          drawOverlayLabel(singleShotArmed ? "Armed" : "Untriggered", plot);
           return;
         }
 
@@ -1098,23 +1328,23 @@
         samples = frozenSamples;
         if (!samples) {
           if (settings.triggerMode !== "none" || singleShotArmed) {
-            drawOverlayLabel(singleShotArmed ? "Armed" : "Untriggered");
+            drawOverlayLabel(singleShotArmed ? "Armed" : "Untriggered", plot);
           }
           return;
         }
       }
 
-      drawWaveform(samples, width, height);
-      drawTriggerLevel(width, height);
+      drawWaveform(samples, plot);
+      drawTriggerLevel(plot);
       updateScopeMeasurements(samples);
     }
 
     function drawSpectrumFrame(frameTime, width, height) {
-      drawGrid(width, height);
+      const plot = drawGrid(width, height, { mode: "spectrum" });
 
       let magnitudesDb;
       if (!paused) {
-        magnitudesDb = computeSpectrum(spectrumTimeSamples(frameTime));
+        magnitudesDb = computeAveragedSpectrum(spectrumTimeSamples(frameTime));
         frozenSpectrum = magnitudesDb;
         lastFrameTime = frameTime;
       } else {
@@ -1122,7 +1352,7 @@
         if (!magnitudesDb) return;
       }
 
-      updateSpectrumMeasurements(drawSpectrum(magnitudesDb, width, height));
+      updateSpectrumMeasurements(drawSpectrum(magnitudesDb, plot));
     }
 
     function drawFrame(frameTime) {
@@ -1185,6 +1415,36 @@
       downId: "voltsDown",
       upId: "voltsUp",
     });
+    createStepper({
+      valueId: "fftSizeValue",
+      selectId: "fftSize",
+      downId: "fftSizeDown",
+      upId: "fftSizeUp",
+    });
+    createStepper({
+      valueId: "spanValue",
+      selectId: "span",
+      downId: "spanDown",
+      upId: "spanUp",
+    });
+    createStepper({
+      valueId: "dbDivValue",
+      selectId: "dbDiv",
+      downId: "dbDivDown",
+      upId: "dbDivUp",
+    });
+    createStepper({
+      valueId: "refLevelValue",
+      selectId: "refLevel",
+      downId: "refLevelDown",
+      upId: "refLevelUp",
+    });
+    createStepper({
+      valueId: "averagesValue",
+      selectId: "averages",
+      downId: "averagesDown",
+      upId: "averagesUp",
+    });
 
     $("triggerDown").onclick = () => bumpTriggerLevel(-1);
     $("triggerUp").onclick = () => bumpTriggerLevel(1);
@@ -1204,14 +1464,17 @@
     canvas.addEventListener("click", (event) => {
       if (viewMode !== "scope") return;
       const rect = canvas.getBoundingClientRect();
-      const relativeY = (event.clientY - rect.top) / rect.height;
+      const plot = getPlot(canvas.width, canvas.height);
+      const canvasY =
+        ((event.clientY - rect.top) / rect.height) * canvas.height;
+      const relativeY = (canvasY - plot.y) / plot.h;
+      if (relativeY < 0 || relativeY > 1) return;
       settings.triggerVolts =
         Math.round((0.5 - relativeY) * fullScaleVolts() * 10) / 10;
       clampTriggerLevel();
     });
 
     setViewMode("scope");
-    setSourceLabel("Test Generator");
     syncGeneratorSettings();
     readSettings();
     drawFrame(0);
