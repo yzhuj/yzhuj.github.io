@@ -2,8 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Web Oscilloscope</title>
+  <meta name="author" content="Yi Zhu" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png" />
+  <link rel="manifest" href="../favicon/site.webmanifest" />
+  <link rel="mask-icon" href="../favicon/safari-pinned-tab.svg" color="#5bbad5" />
+  <link rel="shortcut icon" href="../favicon/favicon.ico" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="msapplication-config" content="../favicon/browserconfig.xml" />
+  <meta name="theme-color" content="#101419" />
+  <title>Web Oscilloscope & Spectrum Analyzer</title>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VG7EVEDVWY"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-VG7EVEDVWY");
+  </script>
+  
   <style>
     :root {
       color-scheme: dark;
@@ -197,6 +217,7 @@
 </head>
 <body>
   <main class="wrap">
+    <h1 class="sr-only">Web Oscilloscope and Spectrum Analyzer</h1>
     <div class="tabs" role="tablist">
       <button type="button" class="tab active" id="tab-scope" role="tab" aria-selected="true">Oscilloscope</button>
       <button type="button" class="tab" id="tab-spectrum" role="tab" aria-selected="false">Spectrum Analyzer</button>
@@ -230,7 +251,7 @@
               <option value="0.001" selected>1 ms</option>
               <option value="0.01">10 ms</option>
               <option value="0.1">100 ms</option>
-              <option value="1">1 s</option>
+              <option value="0.25">250 ms</option>
             </select>
           </div>
 
@@ -244,9 +265,10 @@
               </div>
             </div>
             <select id="volts" class="sr-only" tabindex="-1" aria-hidden="true">
-              <option value="0.1">0.1 V</option>
-              <option value="0.25">0.25 V</option>
-              <option value="0.5">0.5 V</option>
+              <option value="0.01">10 mV</option>
+              <option value="0.1">100 mV</option>
+              <option value="0.25">250 mV</option>
+              <option value="0.5">500 mV</option>
               <option value="1" selected>1 V</option>
               <option value="2">2 V</option>
             </select>
@@ -414,12 +436,11 @@
     // --- Constants -----------------------------------------------------------
     const H_DIVS = 10;
     const V_DIVS = 8;
-    // Vertical mapping uses volts/div × 4 (center to top of the graticule).
     const VERTICAL_FULL_SCALE_DIVS = 4;
     const CAPTURE_SIZE = 2048;
-    const RING_SECONDS = 12;
+    // Longest sweep is 250 ms/div × 10 divs (2.5 s); keep headroom for trigger search.
+    const RING_SECONDS = 6;
     const DEFAULT_SAMPLE_RATE = 48000;
-    // Peak sample = Vpp/2 / full-scale, so Peak-to-peak reads 2.00 V.
     const GENERATOR_VPP = 2;
     const GENERATOR_FREQUENCY = 1000;
 
@@ -437,12 +458,17 @@
     let frozenSamples = null;
     let frozenSpectrum = null;
     let audioInputGeneration = 0;
-    let ringBuffer = null;
+    // Sized for the default rate; resized once if the AudioContext differs.
+    let ringBuffer = new Float32Array(DEFAULT_SAMPLE_RATE * RING_SECONDS);
     let ringWrite = 0;
     let ringFilled = 0;
     let spectrumAvgPower = null;
     let spectrumAvgCount = 0;
     let micStatusMessage = null;
+    let sampleRate = DEFAULT_SAMPLE_RATE;
+    let generatorMode = true;
+    let fullScaleVolts = 1 * VERTICAL_FULL_SCALE_DIVS;
+    let windowSampleCount = Math.max(2, Math.round(0.001 * H_DIVS * sampleRate));
 
     const settings = {
       timePerDiv: 0.001,
@@ -465,9 +491,6 @@
       return hz.toFixed(1) + " Hz";
     }
 
-    function formatTriggerVolts(volts) {
-      return (Math.round(volts * 10) / 10).toFixed(1) + " V";
-    }
 
     function trimNum(value, digits) {
       if (Math.abs(value) < 1e-12) return "0";
@@ -498,29 +521,16 @@
       return trimNum(scaled, digits);
     }
 
-    function fullScaleVolts() {
-      return settings.voltsPerDiv * VERTICAL_FULL_SCALE_DIVS;
-    }
 
     // Plot inset for tick numbers + side unit labels.
     const PLOT_MARGIN = { left: 120, right: 90, top: 48, bottom: 70 };
+    const plotArea = {
+      x: PLOT_MARGIN.left,
+      y: PLOT_MARGIN.top,
+      w: canvas.width - PLOT_MARGIN.left - PLOT_MARGIN.right,
+      h: canvas.height - PLOT_MARGIN.top - PLOT_MARGIN.bottom,
+    };
 
-    function getPlot(width, height) {
-      return {
-        x: PLOT_MARGIN.left,
-        y: PLOT_MARGIN.top,
-        w: width - PLOT_MARGIN.left - PLOT_MARGIN.right,
-        h: height - PLOT_MARGIN.top - PLOT_MARGIN.bottom,
-      };
-    }
-
-    function getSampleRate() {
-      return audioCtx ? audioCtx.sampleRate : DEFAULT_SAMPLE_RATE;
-    }
-
-    function isGeneratorMode() {
-      return $("input").value !== "microphone";
-    }
 
     function syncGeneratorSettings() {
       const mode = $("input").value;
@@ -530,7 +540,7 @@
     }
 
     function sampleToY(sample, plot) {
-      const scale = fullScaleVolts();
+      const scale = fullScaleVolts;
       return (
         plot.y +
         plot.h / 2 -
@@ -538,59 +548,55 @@
       );
     }
 
-    function voltsToY(volts, plot) {
-      return sampleToY(volts / fullScaleVolts(), plot);
-    }
 
-    function windowSampleCount() {
-      return Math.max(2, Math.round(settings.timePerDiv * H_DIVS * getSampleRate()));
-    }
 
     function clearScopeReadouts() {
       $("measureFrequency").textContent = "—";
       $("measureVpp").textContent = "—";
       $("measureRms").textContent = "—";
       $("measureRate").textContent = audioCtx
-        ? Math.round(getSampleRate() / 1000) + " kHz"
+        ? Math.round(sampleRate / 1000) + " kHz"
         : "simulated";
     }
 
     // --- Ring buffer (microphone capture) ------------------------------------
-    function ensureRingBuffer() {
-      const needed = Math.ceil(getSampleRate() * RING_SECONDS);
-      if (!ringBuffer || ringBuffer.length !== needed) {
-        ringBuffer = new Float32Array(needed);
-        ringWrite = 0;
-        ringFilled = 0;
-      }
+    function resizeRingBufferIfNeeded() {
+      const needed = Math.ceil(sampleRate * RING_SECONDS);
+      if (ringBuffer.length === needed) return;
+      ringBuffer = new Float32Array(needed);
+      ringWrite = 0;
+      ringFilled = 0;
     }
 
     function pushToRing(chunk) {
-      ensureRingBuffer();
-      for (let i = 0; i < chunk.length; i++) {
-        ringBuffer[ringWrite] = chunk[i];
-        ringWrite = (ringWrite + 1) % ringBuffer.length;
-        if (ringFilled < ringBuffer.length) {
-          ringFilled += 1;
-        }
+      const n = chunk.length;
+      const len = ringBuffer.length;
+      const first = Math.min(n, len - ringWrite);
+      ringBuffer.set(chunk.subarray(0, first), ringWrite);
+      if (first < n) {
+        ringBuffer.set(chunk.subarray(first), 0);
       }
+      ringWrite = (ringWrite + n) % len;
+      ringFilled = Math.min(len, ringFilled + n);
     }
 
     function clearRing() {
-      if (!ringBuffer) return;
       ringBuffer.fill(0);
       ringWrite = 0;
       ringFilled = 0;
     }
 
     function copyRecentFromRing(count) {
-      ensureRingBuffer();
       const n = Math.min(count, ringFilled);
       const out = new Float32Array(n);
-      let index = (ringWrite - n + ringBuffer.length) % ringBuffer.length;
-      for (let i = 0; i < n; i++) {
-        out[i] = ringBuffer[index];
-        index = (index + 1) % ringBuffer.length;
+      if (n === 0) return out;
+
+      const len = ringBuffer.length;
+      const start = (ringWrite - n + len) % len;
+      const first = Math.min(n, len - start);
+      out.set(ringBuffer.subarray(start, start + first), 0);
+      if (first < n) {
+        out.set(ringBuffer.subarray(0, n - first), first);
       }
       return out;
     }
@@ -614,7 +620,7 @@
       captureMute = audioCtx.createGain();
       captureMute.gain.value = 0;
       captureNode.onaudioprocess = (event) => {
-        if (!isGeneratorMode()) {
+        if (!generatorMode) {
           pushToRing(event.inputBuffer.getChannelData(0));
         }
       };
@@ -631,7 +637,12 @@
       }
 
       audioCtx = new AudioContextClass();
-      ensureRingBuffer();
+      sampleRate = audioCtx.sampleRate;
+      windowSampleCount = Math.max(
+        2,
+        Math.round(settings.timePerDiv * H_DIVS * sampleRate)
+      );
+      resizeRingBufferIfNeeded();
       ensureCaptureGraph();
       return true;
     }
@@ -671,7 +682,7 @@
           },
         })
         .then((mediaStream) => {
-          if (generation !== audioInputGeneration || isGeneratorMode()) {
+          if (generation !== audioInputGeneration || generatorMode) {
             mediaStream.getTracks().forEach((track) => track.stop());
             return;
           }
@@ -684,7 +695,7 @@
           micStatusMessage = null;
         })
         .catch((error) => {
-          if (generation !== audioInputGeneration || isGeneratorMode()) return;
+          if (generation !== audioInputGeneration || generatorMode) return;
           const name = error && error.name;
           if (
             name === "NotFoundError" ||
@@ -705,7 +716,8 @@
 
     function setupAudio() {
       syncGeneratorSettings();
-      if (isGeneratorMode()) {
+      generatorMode = $("input").value !== "microphone";
+      if (generatorMode) {
         setupGenerator();
       } else {
         setupMicrophone();
@@ -714,12 +726,12 @@
 
     // --- Settings / UI controls ----------------------------------------------
     function clampTriggerLevel() {
-      const max = fullScaleVolts();
+      const max = fullScaleVolts;
       let volts = Math.round(settings.triggerVolts * 10) / 10;
       volts = Math.max(-max, Math.min(max, volts));
       if (Math.abs(volts) < 1e-9) volts = 0;
       settings.triggerVolts = volts;
-      const label = formatTriggerVolts(volts);
+      const label = (Math.round(volts * 10) / 10).toFixed(1) + " V";
       $("triggerValue").value = label;
       $("triggerValue").textContent = label;
     }
@@ -743,10 +755,16 @@
         nextFftSize !== settings.fftSize ||
         nextAverages !== settings.averages
       ) {
-        resetSpectrumAverage();
+        spectrumAvgPower = null;
+        spectrumAvgCount = 0;
       }
       settings.fftSize = nextFftSize;
       settings.averages = nextAverages;
+      fullScaleVolts = settings.voltsPerDiv * VERTICAL_FULL_SCALE_DIVS;
+      windowSampleCount = Math.max(
+        2,
+        Math.round(settings.timePerDiv * H_DIVS * sampleRate)
+      );
       syncGeneratorSettings();
       clampTriggerLevel();
     }
@@ -806,7 +824,7 @@
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, width, height);
 
-      const plot = getPlot(width, height);
+      const plot = plotArea;
 
       ctx.save();
       ctx.beginPath();
@@ -866,7 +884,7 @@
           : { unit: "dB", scale: 1, digits: 0 };
       const maxHz =
         mode === "spectrum"
-          ? Math.min(settings.freqSpan, getSampleRate() / 2)
+          ? Math.min(settings.freqSpan, sampleRate / 2)
           : 0;
       const xScale =
         mode === "scope" ? scopeTimeScale() : spectrumHzScale(maxHz);
@@ -882,7 +900,7 @@
 
         const value =
           mode === "scope"
-            ? fullScaleVolts() * (1 - (2 * i) / V_DIVS)
+            ? fullScaleVolts * (1 - (2 * i) / V_DIVS)
             : settings.refLevelDb - i * settings.dbPerDiv;
         const label =
           mode === "scope"
@@ -933,7 +951,7 @@
     }
 
     function drawTriggerLevel(plot) {
-      const y = voltsToY(settings.triggerVolts, plot);
+      const y = sampleToY(settings.triggerVolts / fullScaleVolts, plot);
       ctx.save();
       ctx.beginPath();
       ctx.rect(plot.x, plot.y, plot.w, plot.h);
@@ -981,9 +999,6 @@
       }
     }
 
-    function micStatusLabel() {
-      return !isGeneratorMode() ? micStatusMessage : null;
-    }
 
     function drawScopeStatus(plot, { waitingForTrigger = false } = {}) {
       const labels = [];
@@ -992,14 +1007,14 @@
       } else if (waitingForTrigger || singleShotArmed) {
         labels.push(singleShotArmed ? "ARMED" : "UNTRIGGERED");
       }
-      labels.push(micStatusLabel());
+      labels.push((!generatorMode ? micStatusMessage : null));
       drawStatusStack(plot, labels);
     }
 
     function drawSpectrumStatus(plot) {
       const labels = [];
       if (paused) labels.push("PAUSED");
-      labels.push(micStatusLabel());
+      labels.push((!generatorMode ? micStatusMessage : null));
       drawStatusStack(plot, labels);
     }
 
@@ -1049,7 +1064,6 @@
     }
 
     function drawSpectrum(magnitudesDb, plot) {
-      const sampleRate = getSampleRate();
       const binHz = sampleRate / settings.fftSize;
       const maxHz = Math.min(settings.freqSpan, sampleRate / 2);
       const topDb = settings.refLevelDb;
@@ -1135,7 +1149,7 @@
 
     // --- Signal generation / capture -----------------------------------------
     function sampleWaveform(phaseRadians) {
-      const amp = GENERATOR_VPP / 2 / fullScaleVolts();
+      const amp = GENERATOR_VPP / 2 / fullScaleVolts;
       if (settings.wave === "triangle") {
         const p = ((phaseRadians / (2 * Math.PI)) % 1 + 1) % 1;
         const tri = p < 0.5 ? 4 * p - 1 : 3 - 4 * p;
@@ -1147,7 +1161,7 @@
     function findTriggerIndex(samples) {
       if (settings.triggerMode === "none") return 0;
 
-      const threshold = settings.triggerVolts / fullScaleVolts();
+      const threshold = settings.triggerVolts / fullScaleVolts;
       for (let i = 1; i < samples.length; i++) {
         const previous = samples[i - 1];
         const current = samples[i];
@@ -1166,7 +1180,7 @@
 
     function generateSamples(frameTime) {
       // Oversample relative to the display so the trace stays smooth on fast timebases.
-      const windowCount = Math.max(windowSampleCount(), canvas.width * 4);
+      const windowCount = Math.max(windowSampleCount, canvas.width * 4);
       const samplePeriod = (settings.timePerDiv * H_DIVS) / windowCount;
       const search = new Float32Array(windowCount * 2);
 
@@ -1188,7 +1202,7 @@
     }
 
     function captureMicrophoneWindow() {
-      const windowCount = windowSampleCount();
+      const windowCount = windowSampleCount;
       const searchCount = Math.min(
         ringFilled,
         Math.max(windowCount * 2, windowCount + CAPTURE_SIZE)
@@ -1221,7 +1235,7 @@
     function spectrumTimeSamples(frameTime) {
       const fftSize = settings.fftSize;
 
-      if (!isGeneratorMode() && stream && ringFilled > 0) {
+      if (!generatorMode && stream && ringFilled > 0) {
         const fromRing = copyRecentFromRing(fftSize);
         if (fromRing.length === fftSize) return fromRing;
         const padded = new Float32Array(fftSize);
@@ -1230,7 +1244,6 @@
       }
 
       const samples = new Float32Array(fftSize);
-      const sampleRate = getSampleRate();
       for (let i = 0; i < fftSize; i++) {
         const t = phase + i / sampleRate;
         samples[i] = sampleWaveform(t * GENERATOR_FREQUENCY * 2 * Math.PI);
@@ -1309,17 +1322,14 @@
       return magnitudesDb;
     }
 
-    function resetSpectrumAverage() {
-      spectrumAvgPower = null;
-      spectrumAvgCount = 0;
-    }
 
     function computeAveragedSpectrum(timeSamples) {
       const power = computeSpectrumPower(timeSamples);
       const nAvg = Math.max(1, settings.averages);
 
       if (nAvg <= 1) {
-        resetSpectrumAverage();
+        spectrumAvgPower = null;
+        spectrumAvgCount = 0;
         return powerToDb(power);
       }
 
@@ -1352,7 +1362,7 @@
         sumSquares += value * value;
       }
 
-      const threshold = settings.triggerVolts / fullScaleVolts();
+      const threshold = settings.triggerVolts / fullScaleVolts;
       const crossings = [];
       for (let i = 1; i < samples.length; i++) {
         if (samples[i - 1] < threshold && samples[i] >= threshold) {
@@ -1367,13 +1377,13 @@
         measuredHz = (crossings.length - 1) / (span * samplePeriod);
       }
 
-      const scale = fullScaleVolts();
+      const scale = fullScaleVolts;
       $("measureFrequency").textContent = measuredHz ? formatHz(measuredHz) : "—";
       $("measureVpp").textContent = ((max - min) * scale).toFixed(2) + " V";
       $("measureRms").textContent =
         Math.sqrt((sumSquares / samples.length) * scale * scale).toFixed(2) + " V";
       $("measureRate").textContent = audioCtx
-        ? Math.round(getSampleRate() / 1000) + " kHz"
+        ? Math.round(sampleRate / 1000) + " kHz"
         : "simulated";
     }
 
@@ -1386,7 +1396,7 @@
         : "—";
       $("measureFftSize").textContent = String(settings.fftSize);
       $("measureSpecRate").textContent =
-        Math.round(getSampleRate() / 1000) + " kHz";
+        Math.round(sampleRate / 1000) + " kHz";
     }
 
     // --- Frame loop ----------------------------------------------------------
@@ -1397,7 +1407,7 @@
       let samples;
       if (!paused) {
         samples =
-          !isGeneratorMode() && stream
+          !generatorMode && stream
             ? captureMicrophoneWindow()
             : generateSamples(frameTime);
         lastFrameTime = frameTime;
@@ -1564,17 +1574,18 @@
     canvas.addEventListener("click", (event) => {
       if (viewMode !== "scope") return;
       const rect = canvas.getBoundingClientRect();
-      const plot = getPlot(canvas.width, canvas.height);
+      const plot = plotArea;
       const canvasY =
         ((event.clientY - rect.top) / rect.height) * canvas.height;
       const relativeY = (canvasY - plot.y) / plot.h;
       if (relativeY < 0 || relativeY > 1) return;
       settings.triggerVolts =
-        Math.round((0.5 - relativeY) * fullScaleVolts() * 10) / 10;
+        Math.round((0.5 - relativeY) * fullScaleVolts * 10) / 10;
       clampTriggerLevel();
     });
 
     setViewMode("scope");
+    generatorMode = $("input").value !== "microphone";
     syncGeneratorSettings();
     readSettings();
     drawFrame(0);
